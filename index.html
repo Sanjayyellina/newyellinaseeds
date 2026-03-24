@@ -477,7 +477,7 @@
       <div class="page-title" data-i18n="dispatch.title">Dispatch & Receipts</div>
       <div class="page-subtitle">Generate cryptographically signed, tamper-proof receipts</div>
     </div>
-    <button class="btn btn-gold" onclick="openModal('dispatch-modal')">
+    <button class="btn btn-gold" onclick="openDispatchModal()">
       <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
       <span data-i18n="dispatch.newDispatch">New Dispatch</span>
     </button>
@@ -673,12 +673,16 @@
         <div class="form-group"><label class="form-label">Vehicle Number *</label><input class="form-input" id="d-vehicle" placeholder="e.g. TS08UD5119" style="text-transform:uppercase;"></div>
       </div>
       <div class="form-section"><span class="form-section-icon">🌾</span> Seed Details</div>
-      <div class="form-row cols3">
+      <div class="form-row cols2">
         <div class="form-group"><label class="form-label">Hybrid / Variety *</label><input class="form-input" id="d-hybrid" placeholder="e.g. DS-255"></div>
         <div class="form-group"><label class="form-label">Lot No</label><input class="form-input" id="d-lot" placeholder="e.g. 255202"></div>
-        <div class="form-group"><label class="form-label" data-i18n="dispatch.modal.fromBin">From Bin</label>
-          <select class="form-select" id="d-bin"><option value="">— Select bin —</option></select>
-        </div>
+      </div>
+      <div class="form-section">
+        <span class="form-section-icon">🏭</span> <span data-i18n="dispatch.modal.fromBin">From Bins</span>
+        <button class="btn btn-ghost" style="float:right; padding:4px 8px; height:auto; min-height:0;" onclick="addDispatchBinRow()">+ Add Bin</button>
+      </div>
+      <div id="d-bin-rows">
+        <!-- Populated dynamically by addDispatchBinRow() -->
       </div>
       <div class="form-row cols3">
         <div class="form-group"><label class="form-label" data-i18n="dash.bags">No. of Bags *</label><input class="form-input" id="d-bags" type="number" placeholder="339"></div>

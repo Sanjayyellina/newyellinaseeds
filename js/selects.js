@@ -9,14 +9,22 @@
 // ================================================================
 function populateModalSelects(){
   const emptyBins=state.bins.filter(b=>b.status==='empty');
+  const activeBins=state.bins.filter(b=>b.status!=='empty');
   
   // Update single ID-based selects if any exist
   const sel=document.getElementById('i-bin');
   if(sel){sel.innerHTML='<option value="">— Select available bin —</option>'+emptyBins.map(b=>`<option value="${b.id}">BIN-${b.id}</option>`).join('');}
   
-  const dsel=document.getElementById('d-bin');
-  const activeBins=state.bins.filter(b=>b.status!=='empty');
-  if(dsel){dsel.innerHTML='<option value="">— Select bin —</option>'+activeBins.map(b=>`<option value="${b.id}">BIN-${b.id} — ${b.hybrid||'?'}</option>`).join('');}
+  const dSelects = document.querySelectorAll('.d-bin-select');
+  if (dSelects.length > 0) {
+    dSelects.forEach(dsel => {
+      const currentVal = dsel.value;
+      let opts = '<option value="">— Select bin —</option>';
+      activeBins.forEach(b => { opts += `<option value="${b.id}">BIN-${b.id} — ${b.hybrid||'?'} (${b.qty||0}T)</option>`; });
+      dsel.innerHTML = opts;
+      if (currentVal) dsel.value = currentVal;
+    });
+  }
   
   // Update all dynamically appended intake bin selects
   const intakeSelects = document.querySelectorAll('.i-bin-select');

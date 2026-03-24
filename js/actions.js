@@ -20,6 +20,40 @@ function openIntakeModal() {
   openModal('intake-modal');
 }
 
+function openDispatchModal() {
+  document.getElementById('d-bin-rows').innerHTML = '';
+  addDispatchBinRow();
+  ['d-party','d-address','d-vehicle','d-hybrid','d-lot','d-bags','d-qty','d-moisture','d-amount','d-lr','d-remarks'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  openModal('dispatch-modal');
+}
+
+function addDispatchBinRow() {
+  const container = document.getElementById('d-bin-rows');
+  const row = document.createElement('div');
+  row.className = 'form-row cols3 d-bin-row mt8';
+  row.style.alignItems = 'flex-end';
+  row.style.marginTop = '8px';
+
+  const activeBins = state.bins.filter(b => b.status !== 'empty');
+  let options = '<option value="">— Select bin —</option>';
+  activeBins.forEach(b => {
+    options += `<option value="${b.id}">BIN-${b.id} — ${b.hybrid||'?'} (${b.qty||0}T)</option>`;
+  });
+
+  row.innerHTML = `
+    <div class="form-group"><label class="form-label">From Bin *</label><select class="form-select d-bin-select">${options}</select></div>
+    <div class="form-group"><label class="form-label">Bags from this Bin *</label><input class="form-input d-bin-bags" type="number" placeholder="e.g. 100"></div>
+    <div class="form-group" style="position:relative;">
+      <label class="form-label">Qty from this Bin (Kg)</label>
+      <div style="display:flex; gap:8px;">
+        <input class="form-input d-bin-qty" type="number" placeholder="e.g. 3500" style="flex:1;">
+        <button class="btn btn-ghost" style="padding:0 8px;" onclick="this.closest('.d-bin-row').remove()">✕</button>
+      </div>
+    </div>
+  `;
+  container.appendChild(row);
+}
+
 function addIntakeBinRow() {
   const container = document.getElementById('i-bin-rows');
   const row = document.createElement('div');
@@ -179,15 +213,35 @@ async function saveDispatch(){
   const qty=parseFloat(document.getElementById('d-qty').value);
   const amount=parseFloat(document.getElementById('d-amount').value);
   if(!party||!vehicle||!hybrid||!bags||!qty||!amount){toast('Fill all required fields (*)','error');return;}
+
+  // Gather bin allocations
+  const binRows = document.querySelectorAll('.d-bin-row');
+  const binAllocations = [];
+  let binError = false;
+  binRows.forEach(row => {
+    const binId = row.querySelector('.d-bin-select').value;
+    const binBags = parseInt(row.querySelector('.d-bin-bags').value) || 0;
+    const binQty = parseFloat(row.querySelector('.d-bin-qty').value) || 0;
+    if (binId) {
+      binAllocations.push({ binId: parseInt(binId), bags: binBags, qty: binQty });
+    } else if (binBags || binQty) {
+      binError = true;
+    }
+  });
+  if (binError) { toast('Please select a bin for every row or remove empty rows', 'error'); return; }
+  // binAllocations is optional — dispatch can have no bins selected
+
   const now=new Date();
   const receiptId=`YDS-2026-${String(state.receiptCounter++).padStart(6,'0')}`;
+  // For backward-compat store first bin id (or null) in d.bin; full list in d.bins
   const d={
     receiptId,dateTS:now.getTime(),
     date:now.toLocaleDateString('en-IN',{day:'2-digit',month:'2-digit',year:'numeric'}),
     party,address:document.getElementById('d-address').value,
     vehicle,lr:document.getElementById('d-lr').value,
     hybrid,lot:document.getElementById('d-lot').value,
-    bin:parseInt(document.getElementById('d-bin').value)||null,
+    bin: binAllocations.length ? binAllocations[0].binId : null,
+    bins: binAllocations,
     bags,qty,
     moisture:parseFloat(document.getElementById('d-moisture').value)||0,
     amount,remarks:document.getElementById('d-remarks').value,
@@ -205,6 +259,7 @@ async function saveDispatch(){
       hybrid: d.hybrid,
       lot: d.lot,
       bin_id: d.bin,
+      bins: JSON.stringify(binAllocations),
       bags: d.bags,
       qty: d.qty,
       moisture: d.moisture,
@@ -224,15 +279,17 @@ async function saveDispatch(){
   
   if (success) {
       state.dispatches.unshift(d);
-      dbLogActivity('DISPATCH_CREATED', `Receipt ${d.receiptId} generated for ${d.party} (${d.qty} Tons / ${d.amount} INR)`);
-      if (d.bin) {
-          const b = state.bins[d.bin - 1];
-          if (b.qty) {
-              b.qty = Math.max(0, b.qty - d.qty);
-              b.pkts = Math.max(0, b.pkts - d.bags);
+      const binLabels = binAllocations.length ? binAllocations.map(a=>`BIN-${a.binId}`).join(', ') : 'N/A';
+      dbLogActivity('DISPATCH_CREATED', `Receipt ${d.receiptId} generated for ${d.party} (${d.qty} Kg / ₹${d.amount}) from ${binLabels}`);
+      // Deduct inventory from all selected bins
+      binAllocations.forEach(a => {
+          const b = state.bins[a.binId - 1];
+          if (b) {
+              b.qty = Math.max(0, (b.qty || 0) - (a.qty / 1000)); // convert kg to tons
+              b.pkts = Math.max(0, (b.pkts || 0) - a.bags);
               dbUpdateBin(b.id, { qty: b.qty, pkts: b.pkts });
           }
-      }
+      });
       closeModal('dispatch-modal');
       toast(`Receipt ${receiptId} generated & signed`,'success');
       setTimeout(()=>viewReceipt(receiptId),350);
