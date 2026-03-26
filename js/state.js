@@ -48,6 +48,7 @@ window.Store = {
   // Helper to completely reset state (useful for auth logout)
   reset() {
     window.Store.state = JSON.parse(JSON.stringify(initialState));
+    window.state = window.Store.state; // keep window.state ref in sync
     window.Store.emitChange();
   }
 };

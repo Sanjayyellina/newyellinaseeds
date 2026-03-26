@@ -118,7 +118,7 @@ function renderManagerPage(){
         <div>
           <div style="font-size:9px;text-transform:uppercase;letter-spacing:1px;color:var(--ink-5);text-align:center;margin-bottom:4px;">${t('intake.table.moisture')}</div>
           <input type="number" step="0.1" value="${(bin.currentMoisture||0).toFixed(1)}" class="m-input"
-            onchange="state.bins[${bin.id-1}].currentMoisture=parseFloat(this.value)||0" id="mi-${bin.id}">
+            onchange="(state.bins.find(b=>b.id===${bin.id})||{}).currentMoisture=parseFloat(this.value)||0" id="mi-${bin.id}">
         </div>
         <div>
           <div style="font-size:9px;text-transform:uppercase;letter-spacing:1px;color:var(--ink-5);text-align:center;margin-bottom:4px;">Airflow</div>
@@ -131,7 +131,7 @@ function renderManagerPage(){
         </div>
         <div>
           <div style="font-size:9px;text-transform:uppercase;letter-spacing:1px;color:var(--ink-5);text-align:center;margin-bottom:4px;">${t('dash.status')}</div>
-          <select class="m-status-sel" onchange="state.bins[${bin.id-1}].status=this.value">
+          <select class="m-status-sel" onchange="(state.bins.find(b=>b.id===${bin.id})||{}).status=this.value">
             <option value="intake" ${bin.status==='intake'?'selected':''}>${t('bins.status.intake')}</option>
             <option value="drying" ${bin.status==='drying'?'selected':''}>${t('bins.status.drying')}</option>
             <option value="ready" ${bin.status==='ready'?'selected':''}>${t('bins.status.ready')}</option>
