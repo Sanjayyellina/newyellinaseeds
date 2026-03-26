@@ -88,7 +88,7 @@
 .user-menu.open { display:flex; }
 .user-menu-email {
   padding:12px 14px 10px;
-  font-size:12px; font-weight:600; color:var(--text-secondary);
+  font-size:12px; font-weight:600; color:var(--ink-4);
   word-break:break-all;
 }
 .user-menu-divider {
@@ -97,7 +97,7 @@
 .user-menu-item {
   display:flex; align-items:center; gap:8px;
   padding:10px 14px; font-size:13px; font-weight:500;
-  color:var(--text); cursor:pointer;
+  color:var(--ink); cursor:pointer;
   transition:background .15s;
 }
 .user-menu-item:hover { background:var(--surface-2); }

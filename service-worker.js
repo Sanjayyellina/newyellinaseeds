@@ -4,7 +4,7 @@
    ============================================================ */
 'use strict';
 
-const CACHE_VERSION = 'v8';
+const CACHE_VERSION = 'v9';
 const CACHE_NAME = `yellina-seeds-${CACHE_VERSION}`;
 
 const STATIC_ASSETS = [
@@ -105,8 +105,9 @@ self.addEventListener('fetch', event => {
   }
 
   // ── App shell (HTML, CSS, JS, images): cache-first ──
+  // ignoreSearch:true lets versioned URLs (?v=N) match unversioned cache entries
   event.respondWith(
-    caches.match(request).then(cached => {
+    caches.match(request, { ignoreSearch: true }).then(cached => {
       const networkFetch = fetch(request).then(response => {
         if (response.ok) {
           const clone = response.clone();

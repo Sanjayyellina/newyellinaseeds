@@ -48,7 +48,16 @@ async function bootApp() {
 
   document.getElementById('dash-date').textContent = new Date().toLocaleDateString('en-IN', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
 
-  const bins = await dbFetchBins();
+  // Fetch all data in parallel for faster boot
+  const [bins, intakes, dispatches, maint, labor, binHistory] = await Promise.all([
+    dbFetchBins(),
+    dbFetchIntakes(),
+    dbFetchDispatches(),
+    dbFetchMaintenance(),
+    dbFetchLabor(),
+    dbFetchBinHistory()
+  ]);
+
   if (bins && bins.length > 0) {
     state.bins = bins.map(b => ({
       id: b.id,
@@ -66,7 +75,6 @@ async function bootApp() {
     }));
   }
 
-  const intakes = await dbFetchIntakes();
   if (intakes) {
     state.intakes = intakes.map(i => {
       const binIds = (i.intake_allocations || []).map(a => a.bin_id);
@@ -94,7 +102,6 @@ async function bootApp() {
     });
   }
 
-  const dispatches = await dbFetchDispatches();
   if (dispatches) {
     state.dispatches = dispatches.map(d => ({
       receiptId: d.receipt_id,
@@ -122,16 +129,29 @@ async function bootApp() {
     }
   }
 
-  const maint = await dbFetchMaintenance();
   if (maint) state.maintenance = maint;
-
-  const labor = await dbFetchLabor();
   if (labor) state.labor = labor;
-
-  const binHistory = await dbFetchBinHistory();
   if (binHistory) state.binHistory = binHistory;
 
   if (window.Store) window.Store.emitChange();
+}
+
+// Forgot password — simple prompt for now
+window.showForgotPassword = function() {
+  if (typeof toast === 'function') {
+    toast('Please contact your administrator to reset your password.', 'info');
+  } else {
+    alert('Please contact your administrator to reset your password.');
+  }
+};
+
+// Register service worker for offline support
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/service-worker.js')
+      .then(reg => console.log('SW registered:', reg.scope))
+      .catch(err => console.warn('SW registration failed:', err));
+  });
 }
 
 initApp();

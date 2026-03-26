@@ -238,7 +238,7 @@ async function saveDispatch(){
 
   const dtInput=document.getElementById('d-datetime')?.value;
   const now=dtInput ? new Date(dtInput) : new Date();
-  const receiptId=`YDS-2026-${String(state.receiptCounter++).padStart(6,'0')}`;
+  const receiptId=`YDS-${new Date().getFullYear()}-${String(state.receiptCounter++).padStart(6,'0')}`;
   // For backward-compat store first bin id (or null) in d.bin; full list in d.bins
   const d={
     receiptId,dateTS:now.getTime(),
@@ -466,18 +466,20 @@ async function saveAllMoisture() {
   const ogText = btn ? btn.innerHTML : '';
   if (btn) { btn.innerHTML = 'Saving...'; btn.disabled = true; }
 
-  let saved = 0;
-  for (const b of active) {
+  // Read all input values first, then save in parallel
+  active.forEach(b => {
     const mInput = document.getElementById(`mi-${b.id}`);
     if (mInput) b.currentMoisture = parseFloat(mInput.value) || b.currentMoisture;
-    // Status may have been changed via the select onchange
-    const ok = await dbUpdateBin(b.id, {
+  });
+
+  const results = await Promise.all(active.map(b =>
+    dbUpdateBin(b.id, {
       current_moisture: b.currentMoisture,
       status: b.status,
       airflow: b.airflow
-    });
-    if (ok) saved++;
-  }
+    })
+  ));
+  const saved = results.filter(Boolean).length;
 
   if (btn) { btn.innerHTML = ogText; btn.disabled = false; }
   toast(`${saved} bin${saved !== 1 ? 's' : ''} saved`, saved > 0 ? 'success' : 'error');
