@@ -5,18 +5,25 @@
 // ============================================================
 
 async function initApp() {
-  const { data: { session } } = await dbClient.auth.getSession();
+  // Always sign out any stored session — login is required on every visit
+  await dbClient.auth.signOut();
+
   const loginScreen = document.getElementById('login-screen');
-  const appWrapper = document.querySelector('.wrapper'); // Based on index.html having a wrapper or similar
-  
-  if (!session) {
-    if (loginScreen) loginScreen.style.display = 'flex';
-    if (appWrapper) appWrapper.style.display = 'none';
-    return;
-  } else {
-    if (loginScreen) loginScreen.style.display = 'none';
-    if (appWrapper) appWrapper.style.display = 'flex';
-  }
+  const appShell   = document.getElementById('app-shell');
+
+  // Show login, hide app until user authenticates
+  if (loginScreen) loginScreen.style.display = 'flex';
+  if (appShell)   appShell.style.display = 'none';
+  return;
+}
+
+// Called after successful login to load data and show the app
+async function bootApp() {
+  const loginScreen = document.getElementById('login-screen');
+  const appShell   = document.getElementById('app-shell');
+
+  if (loginScreen) loginScreen.style.display = 'none';
+  if (appShell)   appShell.style.display = 'flex';
 
   document.getElementById('dash-date').textContent=new Date().toLocaleDateString('en-IN',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
   
