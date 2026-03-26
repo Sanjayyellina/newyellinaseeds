@@ -3,19 +3,14 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="theme-color" content="#F5A623">
-<meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="Yellina Seeds">
-<link rel="manifest" href="/manifest.json">
 <title>Yellina Seeds — Operations Platform</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=DM+Mono:wght@400;500&family=Playfair+Display:wght@700;800&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <!-- Modular Stylesheets -->
-<link rel="stylesheet" href="css/variables.css?v=6">
-<link rel="stylesheet" href="css/layout.css?v=6">
-<link rel="stylesheet" href="css/components.css?v=6">
+<link rel="stylesheet" href="css/variables.css?v=7">
+<link rel="stylesheet" href="css/layout.css?v=7">
+<link rel="stylesheet" href="css/components.css?v=7">
 </head>
 
 </head>
@@ -57,7 +52,7 @@
 <!-- ============================================================
      LOGIN SCREEN
      ============================================================ -->
-<div id="login-screen" style="display:flex;position:fixed;inset:0;z-index:1000;background:linear-gradient(135deg,#0F1923 0%,#1E2D3D 50%,#0F1923 100%);align-items:center;justify-content:center;">
+<div id="login-screen" style="display:none;position:fixed;inset:0;z-index:1000;background:linear-gradient(135deg,#0F1923 0%,#1E2D3D 50%,#0F1923 100%);align-items:center;justify-content:center;">
   <!-- Background grain -->
   <div style="position:absolute;inset:0;opacity:.03;background-image:url('data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22200%22><filter id=%22n%22><feTurbulence type=%22fractalNoise%22 baseFrequency=%220.9%22 numOctaves=%224%22/></filter><rect width=%22200%22 height=%22200%22 filter=%22url(%23n)%22 opacity=%221%22/></svg>');background-size:200px;"></div>
 
@@ -111,13 +106,6 @@
   </div>
 </div>
 
-<!-- OFFLINE INDICATOR -->
-<div class="offline-bar" id="offline-bar">
-  <div class="offline-dot"></div>
-  You are offline — changes will sync when connection restores
-  <span id="offline-queue-count" style="background:rgba(255,255,255,.2);padding:1px 8px;border-radius:99px;margin-left:4px;display:none;"></span>
-</div>
-<div id="app-shell" style="display:none">
 <header class="topbar">
   <div class="topbar-left">
     <button class="mobile-menu-btn" onclick="toggleSidebar()">
@@ -916,7 +904,6 @@
 
 <!-- TOAST CONTAINER -->
 <div class="toast-container" id="toasts"></div>
-</div><!-- /app-shell -->
 
 <!-- ============================================================
      JAVASCRIPT
@@ -938,24 +925,5 @@
 <script src="js/receipt.js"></script>
 <script src="js/clock.js"></script>
 <script src="js/init.js"></script>
-<!-- SYNC BADGE -->
-<div class="sync-badge" id="sync-badge" onclick="syncOfflineQueue()"></div>
-<script>
-if('serviceWorker' in navigator){
-  window.addEventListener('load',()=>{
-    navigator.serviceWorker.register('/service-worker.js')
-      .then(r=>console.log('SW:',r.scope)).catch(e=>console.warn('SW fail:',e));
-  });
-}
-function updateOnlineStatus(){
-  const bar=document.getElementById('offline-bar');
-  if(!bar)return;
-  if(navigator.onLine){bar.classList.remove('visible');if(typeof syncOfflineQueue==='function')syncOfflineQueue();}
-  else{bar.classList.add('visible');}
-}
-window.addEventListener('online',updateOnlineStatus);
-window.addEventListener('offline',updateOnlineStatus);
-window.addEventListener('load',()=>setTimeout(updateOnlineStatus,500));
-</script>
 </body>
 </html>

@@ -93,11 +93,6 @@ async function dbFetchLabor() {
 // --- Mutation Functions ---
 
 async function dbUpdateBin(id, updates) {
-  if (!navigator.onLine) {
-    _enqueue({ type: 'UPDATE_BIN', id, updates });
-    if (typeof showToast === 'function') showToast('Offline — bin update queued', 'info');
-    return true;
-  }
   try {
     const { error } = await dbClient.from('bins').update(updates).eq('id', id);
     if (error) throw error;
@@ -110,18 +105,17 @@ async function dbUpdateBin(id, updates) {
 }
 
 async function dbInsertIntake(intake, allocations = []) {
-  if (!navigator.onLine) {
-    _enqueue({ type: 'INSERT_INTAKE', intake, allocations });
-    if (typeof showToast === 'function') showToast('Offline — intake queued for sync', 'info');
-    return true;
-  }
   try {
+    // Insert intake record
     const { error: intakeError } = await dbClient.from('intakes').insert([intake]);
     if (intakeError) throw intakeError;
+    
+    // Insert allocations if any
     if (allocations && allocations.length > 0) {
       const { error: allocError } = await dbClient.from('intake_allocations').insert(allocations);
       if (allocError) throw allocError;
     }
+    
     return true;
   } catch (err) {
     console.error('Error inserting intake:', err);
@@ -131,11 +125,6 @@ async function dbInsertIntake(intake, allocations = []) {
 }
 
 async function dbInsertDispatch(dispatch) {
-  if (!navigator.onLine) {
-    _enqueue({ type: 'INSERT_DISPATCH', dispatch });
-    if (typeof showToast === 'function') showToast('Offline — dispatch queued for sync', 'info');
-    return true;
-  }
   try {
     const { error } = await dbClient.from('dispatches').insert([dispatch]);
     if (error) throw error;
@@ -192,70 +181,6 @@ async function dbFetchBinHistory() {
     return null;
   }
 }
-
-// ============================================================
-// OFFLINE QUEUE — stores pending writes when offline
-// ============================================================
-const OFFLINE_QUEUE_KEY = 'yellina_offline_queue';
-
-function _getQueue() {
-  try { return JSON.parse(localStorage.getItem(OFFLINE_QUEUE_KEY) || '[]'); } catch { return []; }
-}
-function _saveQueue(q) {
-  localStorage.setItem(OFFLINE_QUEUE_KEY, JSON.stringify(q));
-  _updateSyncBadge(q.length);
-}
-function _enqueue(op) {
-  const q = _getQueue();
-  q.push({ ...op, ts: Date.now() });
-  _saveQueue(q);
-  const cnt = document.getElementById('offline-queue-count');
-  if (cnt) { cnt.textContent = `${q.length} pending`; cnt.style.display = 'inline'; }
-}
-function _updateSyncBadge(count) {
-  const badge = document.getElementById('sync-badge');
-  if (!badge) return;
-  if (count > 0) {
-    badge.textContent = `⟳ ${count} change${count>1?'s':''} pending sync`;
-    badge.classList.add('visible');
-  } else {
-    badge.classList.remove('visible');
-    const cnt = document.getElementById('offline-queue-count');
-    if (cnt) cnt.style.display = 'none';
-  }
-}
-
-async function syncOfflineQueue() {
-  const queue = _getQueue();
-  if (!queue.length || !navigator.onLine) return;
-
-  const failed = [];
-  for (const op of queue) {
-    try {
-      if (op.type === 'UPDATE_BIN')        await dbUpdateBin(op.id, op.updates);
-      else if (op.type === 'INSERT_INTAKE') await dbInsertIntake(op.intake, op.allocations);
-      else if (op.type === 'INSERT_DISPATCH') await dbInsertDispatch(op.dispatch);
-      else if (op.type === 'INSERT_MAINTENANCE') await dbInsertMaintenance(op.record);
-      else if (op.type === 'INSERT_LABOR')  await dbInsertLabor(op.record);
-      else if (op.type === 'INSERT_BIN_HISTORY') await dbInsertBinHistory(op.record);
-    } catch { failed.push(op); }
-  }
-
-  _saveQueue(failed);
-  const synced = queue.length - failed.length;
-  if (synced > 0) {
-    if (typeof showToast === 'function') showToast(`Synced ${synced} offline operation${synced>1?'s':''}`, 'success');
-    if (typeof bootApp === 'function') await bootApp();
-  }
-}
-
-// Expose for the online event handler in index.html
-window.syncOfflineQueue = syncOfflineQueue;
-// Check on load for any pending queue
-window.addEventListener('load', () => {
-  const q = _getQueue();
-  if (q.length > 0) _updateSyncBadge(q.length);
-});
 
 // Helper to log activities (for Analytics / Export)
 async function dbLogActivity(action_type, description) {
@@ -319,7 +244,8 @@ window.doLogin = async function() {
   
   const success = await dbLogin(email, pass);
   if (success) {
-    if(typeof bootApp === 'function') bootApp();
+    document.getElementById('login-screen').style.display = 'none';
+    if(typeof initApp === 'function') initApp(); 
   } else {
     if(btn) {
       btn.innerText = 'Sign In';
