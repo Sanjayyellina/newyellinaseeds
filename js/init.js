@@ -77,7 +77,7 @@ async function initApp() {
       hybrid: d.hybrid,
       lot: d.lot || '',
       bin: d.bin_id,
-      bins: d.bins ? (typeof d.bins === 'string' ? JSON.parse(d.bins) : d.bins) : [],
+      bins: Array.isArray(d.bins) ? d.bins : [],
       bags: parseInt(d.bags) || 0,
       qty: parseFloat(d.qty) || 0,
       amount: parseFloat(d.amount) || 0,

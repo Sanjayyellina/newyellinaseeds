@@ -265,7 +265,7 @@ async function saveDispatch(){
       hybrid: d.hybrid,
       lot: d.lot,
       bin_id: d.bin,
-      bins: JSON.stringify(binAllocations),
+      bins: binAllocations,
       bags: d.bags,
       qty: d.qty,
       moisture: d.moisture,
