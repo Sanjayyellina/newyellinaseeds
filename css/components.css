@@ -3,7 +3,7 @@
 /* ============================================================
    STAT CARDS
    ============================================================ */
-.kpi-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(185px,1fr)); gap:14px; margin-bottom:24px; }
+.kpi-grid { display:grid; grid-template-columns:repeat(5,1fr); gap:14px; margin-bottom:24px; }
 .kpi-card {
   background:var(--surface); border:1px solid var(--surface-4);
   border-radius:var(--radius-lg); padding:20px;
@@ -51,7 +51,7 @@
 /* ============================================================
    BIN GRID
    ============================================================ */
-.bins-master { display:grid; grid-template-columns:repeat(auto-fit,minmax(185px,1fr)); gap:12px; margin-bottom:24px; }
+.bins-master { display:grid; grid-template-columns:repeat(5,1fr); gap:12px; margin-bottom:24px; }
 
 .bin-tile {
   background:var(--surface); border:1.5px solid var(--surface-4);
@@ -783,6 +783,8 @@
 
 /* ── Tablet: 641px – 1024px ── */
 @media (max-width: 1024px) {
+  .kpi-grid { grid-template-columns: repeat(3, 1fr); }
+  .bins-master { grid-template-columns: repeat(3, 1fr); }
   .mgr-m-card { flex-wrap: wrap; }
   .mgr-m-controls { width: 100%; justify-content: flex-start; margin-top: 4px; }
   .mgr-moisture-track { max-width: 160px; }
@@ -805,10 +807,12 @@
   .header-actions .btn { flex: 1; justify-content: center; }
 
   /* KPI grid */
+  .kpi-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 16px; }
   .kpi-card { padding: 14px; }
   .kpi-val { font-size: 22px; }
 
   /* Bins grid */
+  .bins-master { grid-template-columns: repeat(2, 1fr); gap: 8px; }
   .bin-tile { padding: 12px; }
 
   /* Manager cards */
