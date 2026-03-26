@@ -3,6 +3,13 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#F5A623">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Yellina Seeds">
+<link rel="manifest" href="/manifest.json">
+<link rel="apple-touch-icon" href="/assets/logo.jpg">
 <title>Yellina Seeds — Operations Platform</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=DM+Mono:wght@400;500&family=Playfair+Display:wght@700;800&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
@@ -104,6 +111,13 @@
       Secured by Supabase · All data encrypted at rest
     </div>
   </div>
+</div>
+
+<!-- OFFLINE INDICATOR -->
+<div class="offline-bar" id="offline-bar">
+  <div class="offline-dot"></div>
+  You're offline — data will sync when connection is restored
+  <span id="offline-queue-count" style="background:rgba(255,255,255,.2);padding:1px 8px;border-radius:99px;margin-left:4px;display:none;"></span>
 </div>
 
 <div id="app-shell" style="display:none">
@@ -905,6 +919,9 @@
 
 <!-- TOAST CONTAINER -->
 <div class="toast-container" id="toasts"></div>
+
+<!-- SYNC BADGE -->
+<div class="sync-badge" id="sync-badge" onclick="syncOfflineQueue()"></div>
 </div><!-- /app-shell -->
 
 <!-- ============================================================
@@ -927,5 +944,32 @@
 <script src="js/receipt.js"></script>
 <script src="js/clock.js"></script>
 <script src="js/init.js"></script>
+<script>
+  // ── Service Worker Registration ──
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('/service-worker.js')
+        .then(reg => console.log('SW registered:', reg.scope))
+        .catch(err => console.warn('SW registration failed:', err));
+    });
+  }
+
+  // ── Offline / Online detection ──
+  function updateOnlineStatus() {
+    const bar = document.getElementById('offline-bar');
+    if (!bar) return;
+    if (navigator.onLine) {
+      bar.classList.remove('visible');
+      // Trigger sync when back online
+      if (typeof syncOfflineQueue === 'function') syncOfflineQueue();
+    } else {
+      bar.classList.add('visible');
+    }
+  }
+  window.addEventListener('online',  updateOnlineStatus);
+  window.addEventListener('offline', updateOnlineStatus);
+  // Initial check after page loads
+  window.addEventListener('load', () => setTimeout(updateOnlineStatus, 500));
+</script>
 </body>
 </html>
