@@ -132,8 +132,14 @@ Moisture shown as single number e.g. `10` (not `9–11%`).
 - Service Worker registered in `init.js` on page load
 - Static assets pre-cached on SW install
 - `ignoreSearch: true` in `caches.match()` so `?v=N` versioned URLs hit cache
-- **Writes (intake/dispatch/moisture save) are NOT queued offline** — they will fail when offline
-- **Reads work offline indefinitely** from cache
+- **Full offline write queue** in `js/offline-queue.js` using `localStorage`
+  - All writes (intake, dispatch, bin update, maintenance, labor, bin history, activity log) are queued when offline
+  - Bin updates deduplicated (last write wins)
+  - Auto-syncs when `window online` event fires
+  - Retries up to 4 times, then discards
+  - Calls `bootApp()` after sync to refresh UI
+- Offline bar (amber banner) shown at top when no internet
+- Sync badge (bottom-right) shows pending count + tap-to-sync button
 
 ---
 
