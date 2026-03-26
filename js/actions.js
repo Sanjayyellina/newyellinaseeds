@@ -119,7 +119,7 @@ async function saveIntake(){
   if (allocations.length === 0) { toast('Please assign at least one bin','error'); return; }
   if (Math.abs(totalAllocated - qty) > 0.01) { toast(`Allocated tons (${totalAllocated}) does not match Intake qty (${qty})`, 'error'); return; }
 
-  const dtInput=document.getElementById('i-datetime').value;
+  const dtInput=document.getElementById('i-datetime')?.value;
   const now=dtInput ? new Date(dtInput) : new Date();
   const dateStr=now.toISOString();
   const intakeId='INT-'+String(state.intakes.length+1).padStart(3,'0');
