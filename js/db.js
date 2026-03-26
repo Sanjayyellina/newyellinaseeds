@@ -135,9 +135,9 @@ async function dbInsertDispatch(dispatch) {
 
 async function dbInsertMaintenance(record) {
   try {
-    const { error } = await dbClient.from('maintenance_logs').insert([record]);
+    const { data, error } = await dbClient.from('maintenance_logs').insert([record]).select().single();
     if (error) throw error;
-    return true;
+    return data;
   } catch (err) {
     console.error('Error inserting maintenance record:', err);
     if (typeof showToast === 'function') showToast(`Failed to save maintenance: ${err.message}`, 'error');
@@ -147,9 +147,9 @@ async function dbInsertMaintenance(record) {
 
 async function dbInsertLabor(record) {
   try {
-    const { error } = await dbClient.from('labor_logs').insert([record]);
+    const { data, error } = await dbClient.from('labor_logs').insert([record]).select().single();
     if (error) throw error;
-    return true;
+    return data;
   } catch (err) {
     console.error('Error inserting labor record:', err);
     if (typeof showToast === 'function') showToast(`Failed to save labor: ${err.message}`, 'error');

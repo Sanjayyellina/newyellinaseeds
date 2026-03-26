@@ -183,7 +183,7 @@ async function saveIntake(){
          dbUpdateBin(b.id, {
              status: 'intake', hybrid: b.hybrid, company: b.company, lot: b.lot,
              qty: b.qty, pkts: b.pkts, entry_moisture: b.entryMoisture,
-             current_moisture: b.currentMoisture, intake_date_ts: b.intakeDateTS.toString(), 
+             current_moisture: b.currentMoisture, intake_date_ts: b.intakeDateTS,
              airflow: 'up'
          });
       });
@@ -395,7 +395,7 @@ async function saveBinModal(binId){
       pkts: b.pkts,
       entry_moisture: b.entryMoisture,
       current_moisture: b.currentMoisture,
-      intake_date_ts: b.intakeDateTS ? b.intakeDateTS.toString() : null,
+      intake_date_ts: b.intakeDateTS || null,
       airflow: b.airflow
   };
   
