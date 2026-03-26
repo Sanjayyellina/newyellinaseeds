@@ -90,120 +90,59 @@ function renderBinsPage(){
 
 function renderManagerPage(){
   const active=state.bins.filter(b=>b.status!=='empty');
-
-  // ── Section 1: Bin Control Grid ──
-  let html = `
-  <div class="mgr-section">
-    <div class="mgr-section-hdr">
-      <div>
-        <div class="mgr-section-title">${t('manager.control')}</div>
-        <div class="mgr-section-sub">Click any bin to update its status or moisture</div>
-      </div>
-    </div>
-    <div class="grid" style="grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px;">
-      ${state.bins.map(b=>renderBinTile(b, true)).join('')}
-    </div>
-  </div>`;
-
-  // ── Section 2: Moisture Updater ──
-  html += `
-  <div class="mgr-section" style="margin-top:32px;">
-    <div class="mgr-section-hdr">
-      <div>
-        <div class="mgr-section-title">${t('manager.moistureUpdater')}</div>
-        <div class="mgr-section-sub">${active.length} active bin${active.length!==1?'s':''} · Update moisture readings and save all at once</div>
-      </div>
-      <button class="btn btn-gold" onclick="saveAllMoisture()">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
-        ${t('actions.saveAll')}
-      </button>
-    </div>`;
-
-  if(!active.length){
-    html += `<div class="empty-state"><div class="empty-icon">💧</div><div class="empty-title">${t('bins.emptyState')}</div><div class="empty-sub">All bins are currently empty</div></div>`;
-  } else {
-    html += `<div class="mgr-cards-list">`;
-    html += active.map(bin=>{
-      const pct = getMoisturePct(bin.currentMoisture);
-      const barColor = getMoistureBarColor(bin.currentMoisture);
-      const days = dateDiff(bin.intakeDateTS);
-      const sinceDate = bin.intakeDate ? bin.intakeDate.split(',')[0] : '—';
-      const statusColors = {
-        intake:'var(--blue)', drying:'var(--amber)', ready:'var(--green)',
-        shelling:'var(--purple)', empty:'var(--ink-5)'
-      };
-      const statusBg = {
-        intake:'var(--blue-bg)', drying:'var(--amber-bg)', ready:'var(--green-bg)',
-        shelling:'var(--purple-bg)', empty:'var(--surface-3)'
-      };
-      const statusBdr = {
-        intake:'var(--blue-bdr)', drying:'var(--amber-bdr)', ready:'var(--green-bdr)',
-        shelling:'var(--purple-bdr)', empty:'var(--surface-4)'
-      };
-      const drop = bin.entryMoisture > 0 ? (bin.entryMoisture - bin.currentMoisture).toFixed(1) : 0;
-      return `
-      <div class="mgr-m-card" style="border-left:3px solid ${statusColors[bin.status]||'var(--surface-4)'};">
-        <div class="mgr-m-left">
-          <div class="mgr-bin-badge" style="background:${statusBg[bin.status]};border-color:${statusBdr[bin.status]};color:${statusColors[bin.status]};">
-            <div class="mgr-bin-num">BIN</div>
-            <div class="mgr-bin-id">${bin.id}</div>
-          </div>
-        </div>
-        <div class="mgr-m-info">
-          <div class="mgr-hybrid-row">
-            <span class="mgr-hybrid">${bin.hybrid||'—'}</span>
-            <span class="mgr-qty-chip">${bin.qty}T</span>
-          </div>
-          <div class="mgr-stats-row">
-            <div class="mgr-stat"><span class="mgr-stat-lbl">Entry</span><span class="mgr-stat-val">${bin.entryMoisture}%</span></div>
-            <div class="mgr-stat-sep"></div>
-            <div class="mgr-stat"><span class="mgr-stat-lbl">Current</span><span class="mgr-stat-val" style="color:${barColor};">${(bin.currentMoisture||0).toFixed(1)}%</span></div>
-            <div class="mgr-stat-sep"></div>
-            <div class="mgr-stat"><span class="mgr-stat-lbl">Drop</span><span class="mgr-stat-val" style="color:var(--green);">-${drop}%</span></div>
-            <div class="mgr-stat-sep"></div>
-            <div class="mgr-stat"><span class="mgr-stat-lbl">Day</span><span class="mgr-stat-val">${days}</span></div>
-            <div class="mgr-stat-sep"></div>
-            <div class="mgr-stat"><span class="mgr-stat-lbl">Since</span><span class="mgr-stat-val">${sinceDate}</span></div>
-          </div>
-          <div class="mgr-mtrack-row">
-            <div class="mgr-moisture-track">
-              <div class="moisture-bar" style="width:${pct}%;background:${barColor};"></div>
-            </div>
-            <span class="mgr-target-lbl">→ 10%</span>
-          </div>
-        </div>
-        <div class="mgr-m-controls">
-          <div class="mgr-ctrl">
-            <div class="mgr-ctrl-lbl">Moisture %</div>
-            <input type="number" step="0.1" min="0" max="40" value="${(bin.currentMoisture||0).toFixed(1)}"
-              class="mgr-m-input" id="mi-${bin.id}"
-              onchange="state.bins[${bin.id-1}].currentMoisture=parseFloat(this.value)||0">
-          </div>
-          <div class="mgr-ctrl">
-            <div class="mgr-ctrl-lbl">Airflow</div>
-            <div class="air-toggle">
-              <button class="air-btn ${bin.airflow==='up'?'active-up':''}" id="air-up-${bin.id}"
-                onclick="setAir(${bin.id},'up')">↑ ${t('bins.airflow.up')}</button>
-              <button class="air-btn ${bin.airflow==='down'?'active-down':''}" id="air-dn-${bin.id}"
-                onclick="setAir(${bin.id},'down')">↓ ${t('bins.airflow.down')}</button>
-            </div>
-          </div>
-          <div class="mgr-ctrl">
-            <div class="mgr-ctrl-lbl">Status</div>
-            <select class="mgr-status-sel" onchange="state.bins[${bin.id-1}].status=this.value">
-              <option value="intake"   ${bin.status==='intake'  ?'selected':''}>${t('bins.status.intake')}</option>
-              <option value="drying"   ${bin.status==='drying'  ?'selected':''}>${t('bins.status.drying')}</option>
-              <option value="ready"    ${bin.status==='ready'   ?'selected':''}>${t('bins.status.ready')}</option>
-              <option value="shelling" ${bin.status==='shelling'?'selected':''}>${t('bins.status.shelling')}</option>
-            </select>
-          </div>
-        </div>
-      </div>`;
-    }).join('');
-    html += `</div>`;
-  }
+  
+  let html = `<div style="margin-bottom: 24px;">`;
+  html += `<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">`;
+  html += `<h2 style="font-size:18px;margin:0;">${t('manager.control')}</h2>`;
   html += `</div>`;
+  html += `<div class="grid" style="grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:20px;">`;
+  html += state.bins.map(b=>renderBinTile(b, true)).join('');
+  html += `</div></div>`;
 
+  html += `<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">`;
+  html += `<h2 style="font-size:18px;margin:0;">${t('manager.moistureUpdater')}</h2>`;
+  html += `<button class="btn btn-solid btn-sm" onclick="saveAllMoisture()">${t('actions.saveAll')}</button>`;
+  html += `</div>`;
+  html += `<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:20px;">`;
+  html += active.length?active.map(bin=>`
+    <div class="m-card" style="border: 2px solid var(--gold);">
+      <div class="m-bin-badge">BIN<br>${bin.id}</div>
+      <div class="m-info">
+        <div class="m-hybrid">${bin.hybrid}</div>
+        <div class="m-meta">${bin.qty}T · ${t('bins.entry')}: <span class="mono fw700">${bin.entryMoisture}%</span> · ${t('bins.status.intake')}: ${bin.intakeDate?bin.intakeDate.split(',')[0]:''} · ${t('bins.day')} ${dateDiff(bin.intakeDateTS)}</div>
+        <div style="margin-top:6px;">
+          <div class="moisture-track" style="max-width:200px;"><div class="moisture-bar" style="width:${getMoisturePct(bin.currentMoisture)}%;background:${getMoistureBarColor(bin.currentMoisture)};"></div></div>
+        </div>
+      </div>
+      <div class="m-controls">
+        <div>
+          <div style="font-size:9px;text-transform:uppercase;letter-spacing:1px;color:var(--ink-5);text-align:center;margin-bottom:4px;">${t('intake.table.moisture')}</div>
+          <input type="number" step="0.1" value="${(bin.currentMoisture||0).toFixed(1)}" class="m-input"
+            onchange="state.bins[${bin.id-1}].currentMoisture=parseFloat(this.value)||0" id="mi-${bin.id}">
+        </div>
+        <div>
+          <div style="font-size:9px;text-transform:uppercase;letter-spacing:1px;color:var(--ink-5);text-align:center;margin-bottom:4px;">Airflow</div>
+          <div class="air-toggle">
+            <button class="air-btn ${bin.airflow==='up'?'active-up':''}" id="air-up-${bin.id}"
+              onclick="setAir(${bin.id},'up')">${t('bins.airflow.up')}</button>
+            <button class="air-btn ${bin.airflow==='down'?'active-down':''}" id="air-dn-${bin.id}"
+              onclick="setAir(${bin.id},'down')">${t('bins.airflow.down')}</button>
+          </div>
+        </div>
+        <div>
+          <div style="font-size:9px;text-transform:uppercase;letter-spacing:1px;color:var(--ink-5);text-align:center;margin-bottom:4px;">${t('dash.status')}</div>
+          <select class="m-status-sel" onchange="state.bins[${bin.id-1}].status=this.value">
+            <option value="intake" ${bin.status==='intake'?'selected':''}>${t('bins.status.intake')}</option>
+            <option value="drying" ${bin.status==='drying'?'selected':''}>${t('bins.status.drying')}</option>
+            <option value="ready" ${bin.status==='ready'?'selected':''}>${t('bins.status.ready')}</option>
+            <option value="shelling" ${bin.status==='shelling'?'selected':''}>${t('bins.status.shelling')}</option>
+          </select>
+        </div>
+      </div>
+    </div>`).join('')
+    :`<div class="empty-state" style="grid-column: 1/-1;"><div class="empty-icon">💧</div><div class="empty-title">${t('bins.emptyState')}</div></div>`;
+  html += `</div>`;
+  
   document.getElementById('manager-content-area').innerHTML = html;
 }
 

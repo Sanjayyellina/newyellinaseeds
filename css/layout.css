@@ -136,7 +136,7 @@
   padding-top:var(--topbar-h);
   min-height:100vh;
 }
-.page-wrap { padding:28px 28px 48px; max-width:1600px; }
+.page-wrap { padding:28px 28px 48px; max-width:1440px; }
 .page { display:none; }
 .page.active { display:block; animation:pageIn .25s ease; }
 @keyframes pageIn { from { opacity:0; transform:translateY(6px); } to { opacity:1; transform:translateY(0); } }
