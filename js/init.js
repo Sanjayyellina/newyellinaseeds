@@ -40,25 +40,30 @@ async function initApp() {
 
   const intakes = await dbFetchIntakes();
   if (intakes) {
-    state.intakes = intakes.map(i => ({
-      id: i.id,
-      challan: i.challan,
-      vehicle: i.vehicle,
-      location: i.location || '',
-      company: i.company || '',
-      hybrid: i.hybrid,
-      lot: i.lot || '',
-      qty: parseFloat(i.qty) || 0,
-      pkts: parseInt(i.pkts) || 0,
-      entryMoisture: parseFloat(i.entry_moisture) || 0,
-      lr: i.lr || '',
-      remarks: i.remarks || '',
-      vehicleWeight: parseFloat(i.vehicle_weight) || 0,
-      grossWeight: parseFloat(i.gross_weight) || 0,
-      netWeight: parseFloat(i.net_weight) || 0,
-      dateTS: new Date(i.created_at).getTime(),
-      date: new Date(i.created_at).toLocaleString('en-IN',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'})
-    }));
+    state.intakes = intakes.map(i => {
+      const binIds = (i.intake_allocations || []).map(a => a.bin_id);
+      return {
+        id: i.id,
+        challan: i.challan,
+        vehicle: i.vehicle,
+        location: i.location || '',
+        company: i.company || '',
+        hybrid: i.hybrid,
+        lot: i.lot || '',
+        qty: parseFloat(i.qty) || 0,
+        pkts: parseInt(i.pkts) || 0,
+        entryMoisture: parseFloat(i.entry_moisture) || 0,
+        lr: i.lr || '',
+        remarks: i.remarks || '',
+        vehicleWeight: parseFloat(i.vehicle_weight) || 0,
+        grossWeight: parseFloat(i.gross_weight) || 0,
+        netWeight: parseFloat(i.net_weight) || 0,
+        bin: binIds[0] || null,
+        bins: binIds,
+        dateTS: new Date(i.created_at).getTime(),
+        date: new Date(i.created_at).toLocaleString('en-IN',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'})
+      };
+    });
   }
 
   const dispatches = await dbFetchDispatches();
@@ -95,6 +100,11 @@ async function initApp() {
   const labor = await dbFetchLabor();
   if (labor) {
     state.labor = labor;
+  }
+
+  const binHistory = await dbFetchBinHistory();
+  if (binHistory) {
+    state.binHistory = binHistory;
   }
 
   if(window.Store) window.Store.emitChange();

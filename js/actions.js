@@ -160,12 +160,15 @@ async function saveIntake(){
   const success = await dbInsertIntake(intakeRecord, dbAllocations);
   
   if (success) {
+      const binIds = allocations.map(a => a.binId);
       const entry = {
         ...intakeRecord,
         entryMoisture: intakeRecord.entry_moisture,
         vehicleWeight: intakeRecord.vehicle_weight,
         grossWeight: intakeRecord.gross_weight,
         netWeight: intakeRecord.net_weight,
+        bin: binIds[0] || null,
+        bins: binIds,
         dateTS: now.getTime(),
         date: now.toLocaleString('en-IN',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'})
       };
@@ -361,11 +364,12 @@ function openBinModal(binId){
 async function saveBinModal(binId){
   const b=state.bins[binId-1];
   const oldStatus = b.status;
-  
+  const snapshotBefore = { ...b }; // capture state before changes for history
+
   b.currentMoisture=parseFloat(document.getElementById('bm-m').value)||b.currentMoisture;
   b.status=document.getElementById('bm-s').value;
   b.airflow=window._bAir||b.airflow;
-  
+
   if(b.status !== 'empty') {
     b.hybrid = document.getElementById('bm-hybrid') ? document.getElementById('bm-hybrid').value : b.hybrid;
     b.qty = document.getElementById('bm-qty') ? parseFloat(document.getElementById('bm-qty').value) || 0 : b.qty;
@@ -403,6 +407,29 @@ async function saveBinModal(binId){
   if (success) {
       if (oldStatus !== b.status) {
           dbLogActivity('BIN_STATUS_CHANGED', `BIN-${b.id} changed to ${b.status}`);
+          // Snapshot bin cycle history when bin is cleared
+          if (b.status === 'empty' && snapshotBefore.hybrid) {
+              const daysInBin = snapshotBefore.intakeDateTS
+                  ? Math.floor((Date.now() - snapshotBefore.intakeDateTS) / 86400000)
+                  : null;
+              const historyRecord = {
+                  bin_id: b.id,
+                  hybrid: snapshotBefore.hybrid,
+                  company: snapshotBefore.company || null,
+                  lot: snapshotBefore.lot || null,
+                  qty: snapshotBefore.qty || 0,
+                  pkts: snapshotBefore.pkts || 0,
+                  entry_moisture: snapshotBefore.entryMoisture || 0,
+                  final_moisture: snapshotBefore.currentMoisture || 0,
+                  days_in_bin: daysInBin,
+                  intake_ref: snapshotBefore.intakeRef || null,
+                  filled_at: snapshotBefore.intakeDateTS ? new Date(snapshotBefore.intakeDateTS).toISOString() : null,
+                  emptied_at: new Date().toISOString()
+              };
+              dbInsertBinHistory(historyRecord).then(ok => {
+                  if (ok) state.binHistory.unshift(historyRecord);
+              });
+          }
       }
       closeModal('bin-modal');
       toast(`BIN-${binId} updated successfully`);
@@ -547,6 +574,25 @@ function executeExport() {
             Remarks: l.notes
         })));
         XLSX.utils.book_append_sheet(wb, laborSheet, "Labor Logs");
+    }
+
+    // Always include Bin History sheet if there is data
+    if (state.binHistory && state.binHistory.length > 0) {
+        const histSheet = XLSX.utils.json_to_sheet(state.binHistory.map(h => ({
+            BinID: `BIN-${h.bin_id}`,
+            Hybrid: h.hybrid,
+            Company: h.company || '—',
+            LotNo: h.lot || '—',
+            QtyTons: h.qty,
+            Bags: h.pkts,
+            EntryMoisture: h.entry_moisture,
+            FinalMoisture: h.final_moisture,
+            DaysInBin: h.days_in_bin,
+            FilledOn: h.filled_at ? new Date(h.filled_at).toLocaleDateString('en-IN') : '—',
+            EmptiedOn: h.emptied_at ? new Date(h.emptied_at).toLocaleDateString('en-IN') : '—',
+            IntakeRef: h.intake_ref || '—'
+        })));
+        XLSX.utils.book_append_sheet(wb, histSheet, "Bin History");
     }
 
     XLSX.writeFile(wb, `Yellina_Report_${new Date().toISOString().slice(0,10)}.xlsx`);

@@ -33,7 +33,10 @@ async function dbFetchBins() {
  */
 async function dbFetchIntakes() {
   try {
-    const { data, error } = await dbClient.from('intakes').select('*').order('created_at', { ascending: false });
+    const { data, error } = await dbClient
+      .from('intakes')
+      .select('*, intake_allocations(bin_id)')
+      .order('created_at', { ascending: false });
     if (error) throw error;
     return data;
   } catch (err) {
@@ -154,6 +157,28 @@ async function dbInsertLabor(record) {
     console.error('Error inserting labor record:', err);
     if (typeof showToast === 'function') showToast(`Failed to save labor: ${err.message}`, 'error');
     return false;
+  }
+}
+
+async function dbInsertBinHistory(record) {
+  try {
+    const { error } = await dbClient.from('bin_history').insert([record]);
+    if (error) throw error;
+    return true;
+  } catch (err) {
+    console.error('Error inserting bin history:', err);
+    return false;
+  }
+}
+
+async function dbFetchBinHistory() {
+  try {
+    const { data, error } = await dbClient.from('bin_history').select('*').order('emptied_at', { ascending: false });
+    if (error) throw error;
+    return data;
+  } catch (err) {
+    console.error('Error fetching bin history:', err);
+    return null;
   }
 }
 

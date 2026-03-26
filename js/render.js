@@ -44,8 +44,8 @@ function renderDashboard(){
       <td class="mono fs12">${i.vehicle}</td>
       <td class="fw700 truncate" style="max-width:160px;">${i.hybrid}</td>
       <td><span class="fw700 text-gold">${i.qty}T</span></td>
-      <td><span class="chip chip-blue">BIN-${i.bin}</span></td>
-      <td><span class="chip ${i.status==='ready'?'chip-green':i.status==='drying'?'chip-amber':'chip-blue'}">${t('bins.status.'+i.status)}</span></td>
+      <td>${(i.bins&&i.bins.length?i.bins:[i.bin]).filter(Boolean).map(b=>`<span class="chip chip-blue">BIN-${b}</span>`).join(' ')||'—'}</td>
+      <td><span class="chip chip-blue">Intake</span></td>
     </tr>`).join('')
     :`<tr><td colspan="7"><div class="empty-state"><div class="empty-icon">📋</div><div class="empty-title">${t('dash.noIntakes')}</div></div></td></tr>`;
 
@@ -76,9 +76,9 @@ function renderIntakePage(){
       <td class="mono fs12">${i.grossWeight||'—'}</td>
       <td class="mono fw700" style="color:var(--blue);">${i.netWeight||'—'}</td>
       <td><span class="mono fw700" style="color:${getMoistureColor(i.entryMoisture)};">${i.entryMoisture}%</span></td>
-      <td><span class="chip chip-blue">BIN-${i.bin}</span></td>
-      <td><span class="chip ${i.status==='ready'?'chip-green':i.status==='drying'?'chip-amber':'chip-blue'}">${t('bins.status.'+i.status)}</span></td>
-      <td><button class="btn btn-ghost btn-sm" onclick="openBinModal(${i.bin})">${t('actions.view')} Bin</button></td>
+      <td>${(i.bins&&i.bins.length?i.bins:[i.bin]).filter(Boolean).map(b=>`<span class="chip chip-blue">BIN-${b}</span>`).join(' ')||'—'}</td>
+      <td><span class="chip chip-blue">Intake</span></td>
+      <td>${i.bin?`<button class="btn btn-ghost btn-sm" onclick="openBinModal(${i.bin})">${t('actions.view')} Bin</button>`:'—'}</td>
     </tr>`).join('')
     :`<tr><td colspan="15"><div class="empty-state"><div class="empty-icon">🚛</div><div class="empty-title">${t('dash.noIntakes')}</div><div class="empty-sub">Start by logging a new truck intake above</div></div></td></tr>`;
 }

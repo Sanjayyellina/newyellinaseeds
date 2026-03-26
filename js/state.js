@@ -22,6 +22,7 @@ const initialState = {
   dispatches:[],
   maintenance: [],
   labor: [],
+  binHistory: [],
   receiptCounter:1001,
   activeReceiptHash:null,
   currentPage: 'dashboard'

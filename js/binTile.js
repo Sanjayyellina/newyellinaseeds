@@ -37,7 +37,7 @@ function renderBinTile(bin, isManager = false){
       <div style="height:100%;width:${hoursPct}%;background:${hoursColor};border-radius:2px;transition:width 0.4s;"></div>
     </div>
     <div class="moisture-track"><div class="moisture-bar" style="width:${getMoisturePct(m)}%;background:${getMoistureBarColor(m)};"></div></div>
-    <div class="moisture-row"><span class="m-current" style="color:${getMoistureColor(m)};font-family:'DM Mono',monospace;">${m.toFixed(1)}%</span><span class="m-target">→9–11%</span></div>
+    <div class="moisture-row"><span class="m-current" style="color:${getMoistureColor(m)};font-family:'DM Mono',monospace;">${m.toFixed(1)}%</span><span class="m-target">→10%</span></div>
     <span class="air-tag ${bin.airflow==='up'?'air-up':'air-down'}">${bin.airflow==='up'?t('bins.airflow.up'):t('bins.airflow.down')}</span>
   </div>`;
 }
