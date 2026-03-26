@@ -4,22 +4,24 @@
 "use strict";
 // ============================================================
 
+// Always sign out on page load so login is required every visit
 async function initApp() {
-  const { data: { session } } = await dbClient.auth.getSession();
+  await dbClient.auth.signOut();
   const loginScreen = document.getElementById('login-screen');
-  const appWrapper = document.querySelector('.wrapper'); // Based on index.html having a wrapper or similar
-  
-  if (!session) {
-    if (loginScreen) loginScreen.style.display = 'flex';
-    if (appWrapper) appWrapper.style.display = 'none';
-    return;
-  } else {
-    if (loginScreen) loginScreen.style.display = 'none';
-    if (appWrapper) appWrapper.style.display = 'flex';
-  }
+  const appShell = document.getElementById('app-shell');
+  if (loginScreen) loginScreen.style.display = 'flex';
+  if (appShell) appShell.style.display = 'none';
+}
 
-  document.getElementById('dash-date').textContent=new Date().toLocaleDateString('en-IN',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
-  
+// Called after successful login to load data and show the app
+async function bootApp() {
+  const loginScreen = document.getElementById('login-screen');
+  const appShell = document.getElementById('app-shell');
+  if (loginScreen) loginScreen.style.display = 'none';
+  if (appShell) appShell.style.display = 'block';
+
+  document.getElementById('dash-date').textContent = new Date().toLocaleDateString('en-IN', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+
   const bins = await dbFetchBins();
   if (bins && bins.length > 0) {
     state.bins = bins.map(b => ({
@@ -34,7 +36,7 @@ async function initApp() {
       currentMoisture: parseFloat(b.current_moisture) || 0,
       airflow: b.airflow || 'up',
       intakeDateTS: b.intake_date_ts ? parseInt(b.intake_date_ts) : null,
-      intakeDate: b.intake_date_ts ? new Date(parseInt(b.intake_date_ts)).toLocaleString('en-IN',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'}) : ''
+      intakeDate: b.intake_date_ts ? new Date(parseInt(b.intake_date_ts)).toLocaleString('en-IN', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : ''
     }));
   }
 
@@ -61,7 +63,7 @@ async function initApp() {
         bin: binIds[0] || null,
         bins: binIds,
         dateTS: new Date(i.created_at).getTime(),
-        date: new Date(i.created_at).toLocaleString('en-IN',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'})
+        date: new Date(i.created_at).toLocaleString('en-IN', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })
       };
     });
   }
@@ -86,7 +88,7 @@ async function initApp() {
       hash: d.hash || '',
       signature: d.signature || '',
       dateTS: new Date(d.created_at).getTime(),
-      date: new Date(d.created_at).toLocaleDateString('en-IN',{day:'2-digit',month:'2-digit',year:'numeric'})
+      date: new Date(d.created_at).toLocaleDateString('en-IN', { day: '2-digit', month: '2-digit', year: 'numeric' })
     }));
     if (state.dispatches.length > 0) {
       const maxReceipt = Math.max(...state.dispatches.map(d => parseInt(d.receipt_id.split('-')[2]) || 0));
@@ -95,21 +97,15 @@ async function initApp() {
   }
 
   const maint = await dbFetchMaintenance();
-  if (maint) {
-    state.maintenance = maint;
-  }
+  if (maint) state.maintenance = maint;
 
   const labor = await dbFetchLabor();
-  if (labor) {
-    state.labor = labor;
-  }
+  if (labor) state.labor = labor;
 
   const binHistory = await dbFetchBinHistory();
-  if (binHistory) {
-    state.binHistory = binHistory;
-  }
+  if (binHistory) state.binHistory = binHistory;
 
-  if(window.Store) window.Store.emitChange();
+  if (window.Store) window.Store.emitChange();
 }
 
 initApp();

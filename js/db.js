@@ -244,8 +244,7 @@ window.doLogin = async function() {
   
   const success = await dbLogin(email, pass);
   if (success) {
-    document.getElementById('login-screen').style.display = 'none';
-    if(typeof initApp === 'function') initApp(); 
+    if(typeof bootApp === 'function') bootApp();
   } else {
     if(btn) {
       btn.innerText = 'Sign In';
