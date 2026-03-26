@@ -3,7 +3,7 @@
 /* ============================================================
    STAT CARDS
    ============================================================ */
-.kpi-grid { display:grid; grid-template-columns:repeat(5,1fr); gap:14px; margin-bottom:24px; }
+.kpi-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(185px,1fr)); gap:14px; margin-bottom:24px; }
 .kpi-card {
   background:var(--surface); border:1px solid var(--surface-4);
   border-radius:var(--radius-lg); padding:20px;
@@ -51,8 +51,7 @@
 /* ============================================================
    BIN GRID
    ============================================================ */
-.bins-master { display:grid; grid-template-columns:repeat(5,1fr); gap:12px; margin-bottom:24px; }
-@media(max-width:1300px) { .bins-master { grid-template-columns:repeat(4,1fr); } }
+.bins-master { display:grid; grid-template-columns:repeat(auto-fit,minmax(185px,1fr)); gap:12px; margin-bottom:24px; }
 
 .bin-tile {
   background:var(--surface); border:1.5px solid var(--surface-4);
@@ -326,8 +325,8 @@
 /* ============================================================
    ANALYTICS
    ============================================================ */
-.analytics-grid { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:16px; }
-.analytics-grid-3 { display:grid; grid-template-columns:1fr 1fr 1fr; gap:16px; }
+.analytics-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(380px,1fr)); gap:16px; margin-bottom:16px; }
+.analytics-grid-3 { display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:16px; }
 .chart-panel { background:var(--surface); border:1px solid var(--surface-4); border-radius:var(--radius-lg); padding:20px; box-shadow:var(--shadow-xs); }
 .chart-title { font-size:13px; font-weight:700; color:var(--ink); margin-bottom:16px; }
 .chart-subtitle { font-size:11px; color:var(--ink-5); font-weight:400; margin-left:6px; }
@@ -436,8 +435,8 @@
 /* ============================================================
    MISC UTILS
    ============================================================ */
-.grid2 { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
-.grid3 { display:grid; grid-template-columns:1fr 1fr 1fr; gap:16px; }
+.grid2 { display:grid; grid-template-columns:repeat(auto-fit,minmax(300px,1fr)); gap:16px; }
+.grid3 { display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:16px; }
 .mt16 { margin-top:16px; }
 .mt24 { margin-top:24px; }
 .mb16 { margin-bottom:16px; }
@@ -478,18 +477,6 @@
    MOBILE RESPONSIVENESS
    ============================================================ */
 @media (max-width: 992px) {
-  .kpi-grid {
-    grid-template-columns: 1fr 1fr;
-  }
-  .kpi-card:first-child {
-    grid-column: 1 / -1;
-  }
-  .bins-master {
-    grid-template-columns: 1fr 1fr;
-  }
-  .analytics-grid, .analytics-grid-3, .grid2, .grid3 {
-    grid-template-columns: 1fr;
-  }
   .form-row.cols2, .form-row.cols3 {
     grid-template-columns: 1fr;
   }
@@ -503,7 +490,7 @@
     -webkit-overflow-scrolling: touch;
   }
   .data-table {
-    min-width: 600px; /* Force table to scroll instead of squash */
+    min-width: 600px;
   }
 }
 
@@ -796,12 +783,6 @@
 
 /* ── Tablet: 641px – 1024px ── */
 @media (max-width: 1024px) {
-  .kpi-grid { grid-template-columns: repeat(3, 1fr); }
-  .kpi-card:nth-child(4),
-  .kpi-card:nth-child(5) { grid-column: span 1; }
-  .bins-master { grid-template-columns: repeat(3, 1fr); }
-  .analytics-grid-3 { grid-template-columns: 1fr 1fr; }
-
   .mgr-m-card { flex-wrap: wrap; }
   .mgr-m-controls { width: 100%; justify-content: flex-start; margin-top: 4px; }
   .mgr-moisture-track { max-width: 160px; }
@@ -824,13 +805,10 @@
   .header-actions .btn { flex: 1; justify-content: center; }
 
   /* KPI grid */
-  .kpi-grid { grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 16px; }
   .kpi-card { padding: 14px; }
   .kpi-val { font-size: 22px; }
-  .kpi-card:nth-child(5) { grid-column: 1 / -1; }
 
   /* Bins grid */
-  .bins-master { grid-template-columns: 1fr 1fr; gap: 8px; }
   .bin-tile { padding: 12px; }
 
   /* Manager cards */
@@ -862,9 +840,6 @@
   .mgr-section-hdr { flex-direction: column; align-items: stretch; }
   .mgr-section-hdr .btn { width: 100%; justify-content: center; margin-top: 4px; }
 
-  /* Analytics */
-  .analytics-grid, .analytics-grid-3, .grid2, .grid3 { grid-template-columns: 1fr; }
-
   /* Tables */
   .panel-body { overflow-x: auto; -webkit-overflow-scrolling: touch; }
   .data-table { min-width: 560px; }
@@ -892,9 +867,6 @@
 
 /* ── Very small phones: ≤ 375px ── */
 @media (max-width: 375px) {
-  .kpi-grid { grid-template-columns: 1fr; }
-  .kpi-card:nth-child(5) { grid-column: unset; }
-  .bins-master { grid-template-columns: 1fr; }
   .page-wrap { padding: 12px 12px 60px; }
   .mgr-m-controls { grid-template-columns: 1fr; }
   .mgr-ctrl:last-child { grid-column: unset; }
@@ -904,6 +876,5 @@
 @media (max-width: 900px) and (orientation: landscape) {
   .sidebar { width: 220px; }
   .page-wrap { padding: 12px 16px 32px; }
-  .kpi-grid { grid-template-columns: repeat(5, 1fr); }
   .mgr-m-card { flex-direction: row; flex-wrap: wrap; }
 }
