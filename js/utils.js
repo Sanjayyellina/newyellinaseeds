@@ -44,8 +44,13 @@ function toast(msg,type='success'){
   setTimeout(()=>{t.classList.remove('show');setTimeout(()=>t.remove(),400);},3500);
 }
 function filterTable(inputId,tbodyId){
-  const q=document.getElementById(inputId).value.toLowerCase();
-  document.querySelectorAll('#'+tbodyId+' tr').forEach(r=>{
+  const inp=document.getElementById(inputId);
+  const tbody=document.getElementById(tbodyId);
+  if(!inp||!tbody)return;
+  const q=inp.value.toLowerCase();
+  tbody.querySelectorAll('tr').forEach(r=>{
     r.style.display=r.textContent.toLowerCase().includes(q)?'':'none';
   });
 }
+// Alias so db.js and error-boundary.js can call showToast consistently
+window.showToast = function(msg, type){ toast(msg, type); };

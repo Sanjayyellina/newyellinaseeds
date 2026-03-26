@@ -177,7 +177,8 @@ async function saveIntake(){
       dbLogActivity('INTAKE_CREATED', `Intake ${intakeId} created for ${qty} Tons of ${hybrid} (Challan: ${challan})`);
       
       allocations.forEach(a => {
-         const b = state.bins[a.binId - 1];
+         const b = state.bins.find(x => x.id === a.binId);
+         if (!b) { console.warn(`Bin ${a.binId} not found in state`); return; }
          b.status='intake';b.hybrid=hybrid;b.company=intakeRecord.company;b.lot=intakeRecord.lot;
          b.qty=(b.qty || 0) + a.qty;b.pkts=(b.pkts || 0) + a.pkts;b.entryMoisture=intakeRecord.entry_moisture;
          b.currentMoisture=intakeRecord.entry_moisture;b.intakeDate=entry.date;
@@ -288,7 +289,7 @@ async function saveDispatch(){
       dbLogActivity('DISPATCH_CREATED', `Receipt ${d.receiptId} generated for ${d.party} (${d.qty} Kg / ₹${d.amount}) from ${binLabels}`);
       // Deduct inventory from all selected bins
       binAllocations.forEach(a => {
-          const b = state.bins[a.binId - 1];
+          const b = state.bins.find(x => x.id === a.binId);
           if (b) {
               b.qty = Math.max(0, (b.qty || 0) - (a.qty / 1000)); // convert kg to tons
               b.pkts = Math.max(0, (b.pkts || 0) - a.bags);
@@ -307,7 +308,7 @@ async function saveDispatch(){
 }
 
 function openBinModal(binId){
-  const bin=state.bins[binId-1];
+  const bin=state.bins.find(b => b.id === binId);
   document.getElementById('bin-modal-title').textContent=`BIN-${bin.id} — ${bin.status==='empty'?'Empty':'Update'}`;
   const m=bin.currentMoisture||0;
   const days=dateDiff(bin.intakeDateTS);
@@ -362,7 +363,8 @@ function openBinModal(binId){
   openModal('bin-modal');
 }
 async function saveBinModal(binId){
-  const b=state.bins[binId-1];
+  const b=state.bins.find(x => x.id === binId);
+  if (!b) { toast(`BIN-${binId} not found`, 'error'); return; }
   const oldStatus = b.status;
   const snapshotBefore = { ...b }; // capture state before changes for history
 
@@ -442,6 +444,45 @@ async function saveBinModal(binId){
   btn.disabled = false;
 }
 
+
+// ================================================================
+// MANAGER PAGE — AIRFLOW & BULK MOISTURE SAVE
+// ================================================================
+function setAir(binId, direction) {
+  const b = state.bins.find(x => x.id === binId);
+  if (!b) return;
+  b.airflow = direction;
+  const upBtn = document.getElementById(`air-up-${binId}`);
+  const dnBtn = document.getElementById(`air-dn-${binId}`);
+  if (upBtn) { upBtn.classList.toggle('active-up', direction === 'up'); upBtn.classList.remove(direction === 'up' ? '' : 'active-up'); }
+  if (dnBtn) { dnBtn.classList.toggle('active-down', direction === 'down'); }
+}
+
+async function saveAllMoisture() {
+  const active = state.bins.filter(b => b.status !== 'empty');
+  if (!active.length) { toast('No active bins to save', 'info'); return; }
+
+  const btn = document.querySelector('[onclick="saveAllMoisture()"]');
+  const ogText = btn ? btn.innerHTML : '';
+  if (btn) { btn.innerHTML = 'Saving...'; btn.disabled = true; }
+
+  let saved = 0;
+  for (const b of active) {
+    const mInput = document.getElementById(`mi-${b.id}`);
+    if (mInput) b.currentMoisture = parseFloat(mInput.value) || b.currentMoisture;
+    // Status may have been changed via the select onchange
+    const ok = await dbUpdateBin(b.id, {
+      current_moisture: b.currentMoisture,
+      status: b.status,
+      airflow: b.airflow
+    });
+    if (ok) saved++;
+  }
+
+  if (btn) { btn.innerHTML = ogText; btn.disabled = false; }
+  toast(`${saved} bin${saved !== 1 ? 's' : ''} saved`, saved > 0 ? 'success' : 'error');
+  if (window.Store) window.Store.emitChange();
+}
 
 let managerAccessBtn = null;
 function showManagerAccess(btnElement) {
