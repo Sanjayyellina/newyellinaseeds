@@ -145,6 +145,31 @@ function renderManagerPage(){
     :`<div class="empty-state" style="grid-column: 1/-1;"><div class="empty-icon">💧</div><div class="empty-title">${t('bins.emptyState')}</div></div>`;
   html += `</div>`;
   
+  // Intake records — editable
+  html += `<div style="margin-top:32px;">`;
+  html += `<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">`;
+  html += `<h2 style="font-size:18px;margin:0;">Intake Records</h2>`;
+  html += `<button class="btn btn-gold btn-sm" onclick="openIntakeModal()">+ New Intake</button>`;
+  html += `</div>`;
+  html += `<div class="panel"><table class="data-table"><thead><tr>`;
+  html += `<th>#</th><th>Date</th><th>Challan</th><th>Vehicle</th><th>Hybrid</th><th>Qty (T)</th><th>Bins</th><th>Actions</th>`;
+  html += `</tr></thead><tbody>`;
+  if (state.intakes.length) {
+    html += state.intakes.map((i, idx) => `<tr>
+      <td class="mono text-muted fs12">${idx+1}</td>
+      <td class="fs12 text-muted">${i.date}</td>
+      <td><span class="mono fw700 text-gold">${i.challan}</span></td>
+      <td class="mono">${i.vehicle}</td>
+      <td class="fw700">${i.hybrid}</td>
+      <td><span class="fw700 text-gold">${i.qty}T</span></td>
+      <td>${(i.bins&&i.bins.length?i.bins:[i.bin]).filter(Boolean).map(b=>'<span class="chip chip-blue">BIN-'+b+'</span>').join(' ')||'—'}</td>
+      <td><button class="btn btn-ghost btn-sm" onclick="openEditIntakeModal('${i.id}')" title="Edit Intake">✏️ Edit</button></td>
+    </tr>`).join('');
+  } else {
+    html += `<tr><td colspan="8"><div class="empty-state"><div class="empty-icon">🚛</div><div class="empty-title">No intakes yet</div></div></td></tr>`;
+  }
+  html += `</tbody></table></div></div>`;
+
   document.getElementById('manager-content-area').innerHTML = html;
 }
 
