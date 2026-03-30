@@ -27,7 +27,7 @@ function renderBinTile(bin, isManager = false){
   return`<div class="bin-tile ${sc}" ${clickAction}>
     <div class="bin-tile-top"><span class="bin-num-label">BIN-${bin.id}</span><div class="status-dot ${dc}"></div></div>
     <div class="bin-hybrid-name" title="${bin.hybrid}">${bin.hybrid}</div>
-    <div class="bin-meta-row">${bin.qty}T${bin.pkts?' · '+bin.pkts+' '+t('dash.bags'):''}${days?' · '+t('bins.day')+' '+days:''}</div>
+    <div class="bin-meta-row">${bin.qty} Kg${bin.pkts?' · '+bin.pkts+' '+t('dash.bags'):''}${days?' · '+t('bins.day')+' '+days:''}</div>
     <div class="bin-hours-row" style="display:flex;align-items:center;gap:6px;margin:4px 0 2px;">
       <span style="font-size:11px;opacity:0.6;white-space:nowrap;">⏱ Hrs in bin</span>
       <span style="font-size:13px;font-weight:700;font-family:'DM Mono',monospace;color:${hoursColor};">${hours}h</span>
