@@ -299,8 +299,8 @@
         <div class="panel-title" data-i18n="dash.recentIntakes">Recent Intakes</div>
         <button class="btn btn-ghost btn-sm" onclick="showPage('intake',document.querySelectorAll('.nav-item')[4])">View All</button>
       </div>
-      <div class="panel-body">
-        <table class="data-table"><thead><tr>
+      <div class="panel-body" style="overflow-x:auto;">
+        <table class="data-table" style="min-width:520px;"><thead><tr>
           <th data-i18n="dash.date">Date</th><th data-i18n="dash.challan">DR No</th><th data-i18n="dash.vehicle">Vehicle</th><th data-i18n="dash.hybrid">Hybrid</th><th data-i18n="dash.qty">Qty</th><th data-i18n="dash.bin">Bin</th><th data-i18n="dash.status">Status</th>
         </tr></thead><tbody id="recent-tbody"></tbody></table>
       </div>
