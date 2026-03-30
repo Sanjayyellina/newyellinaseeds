@@ -584,12 +584,18 @@
       <div class="form-section"><span class="form-section-icon">🚛</span> <span data-i18n="intake.modal.truck">Truck & Transport</span></div>
       <div class="form-row cols2">
         <div class="form-group"><label class="form-label">Challan No *</label><input class="form-input" id="i-challan" placeholder="e.g. 178"></div>
-        <div class="form-group"><label class="form-label">Vehicle Number *</label><input class="form-input" id="i-vehicle" placeholder="e.g. AP39WF7419" style="text-transform:uppercase;"></div>
-      </div>
-      <div class="form-row cols3">
         <div class="form-group"><label class="form-label">From Location</label><input class="form-input" id="i-location" placeholder="Village, Mandal, District"></div>
-        <div class="form-group"><label class="form-label">Vehicle Weight (Kg)</label><input class="form-input" id="i-veh-weight" type="number" placeholder="e.g. 8500"></div>
-        <div class="form-group"><label class="form-label">Gross Weight (Kg)</label><input class="form-input" id="i-gross-weight" type="number" placeholder="e.g. 44500"></div>
+      </div>
+      <div class="form-section" style="font-size:13px;padding:8px 0 4px;">
+        <span>Vehicles</span>
+        <button class="btn btn-ghost" style="float:right; padding:4px 8px; height:auto; min-height:0;" onclick="addVehicleRow()">+ Add Vehicle</button>
+      </div>
+      <div id="i-vehicle-rows">
+        <div class="form-row cols3 i-vehicle-row" style="align-items:flex-end;">
+          <div class="form-group"><label class="form-label">Vehicle Number *</label><input class="form-input i-vehicle-input" placeholder="e.g. AP39WF7419" style="text-transform:uppercase;"></div>
+          <div class="form-group"><label class="form-label">Vehicle Weight (Kg)</label><input class="form-input i-veh-weight-input" type="number" placeholder="e.g. 8500"></div>
+          <div class="form-group"><label class="form-label">Gross Weight (Kg)</label><input class="form-input i-gross-weight-input" type="number" placeholder="e.g. 44500"></div>
+        </div>
       </div>
       <div class="form-row cols2" style="margin-bottom:4px;">
         <div class="form-group"><label class="form-label">Date & Time <span style="color:var(--ink-4);font-weight:400;">(optional — leave blank for now)</span></label><input class="form-input" id="i-datetime" type="datetime-local"></div>
@@ -618,8 +624,17 @@
           <div class="form-group"><label class="form-label">Bags</label><input class="form-input i-bin-pkts" type="number" placeholder="e.g. 20"></div>
         </div>
       </div>
-      <div class="form-row cols1" style="margin-top:16px;">
-        <div class="form-group"><label class="form-label">LR Number</label><input class="form-input" id="i-lr" placeholder="LR No."></div>
+      <div class="form-section" style="font-size:13px;padding:8px 0 4px;margin-top:12px;">
+        <span>LR Numbers</span>
+        <button class="btn btn-ghost" style="float:right; padding:4px 8px; height:auto; min-height:0;" onclick="addLRRow()">+ Add LR</button>
+      </div>
+      <div id="i-lr-rows">
+        <div class="form-row cols1 i-lr-row" style="align-items:flex-end;">
+          <div class="form-group" style="position:relative;">
+            <label class="form-label">LR Number</label>
+            <input class="form-input i-lr-input" placeholder="LR No.">
+          </div>
+        </div>
       </div>
       <div class="form-row cols1">
         <div class="form-group"><label class="form-label">Remarks</label><textarea class="form-textarea" id="i-remarks" placeholder="Any additional notes…"></textarea></div>
@@ -906,9 +921,9 @@
 <script src="js/selects.js"></script>
 <script src="js/binTile.js"></script>
 <script src="js/render.js"></script>
-<script src="js/actions.js?v=3"></script>
+<script src="js/actions.js?v=4"></script>
 <script src="js/receipt.js"></script>
 <script src="js/clock.js?v=2"></script>
-<script src="js/init.js?v=5"></script>
+<script src="js/init.js?v=6"></script>
 </body>
 </html>
