@@ -10,7 +10,7 @@
 <!-- Modular Stylesheets -->
 <link rel="stylesheet" href="css/variables.css?v=10">
 <link rel="stylesheet" href="css/layout.css?v=10">
-<link rel="stylesheet" href="css/components.css?v=11">
+<link rel="stylesheet" href="css/components.css?v=12">
 </head>
 <body>
 
@@ -92,7 +92,7 @@
   <div class="topbar-center">
     <div class="search-bar">
       <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="color:var(--ink-5)"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-      <input id="global-search" placeholder="Search challan, vehicle, hybrid, receipt…" oninput="globalSearch(this.value)">
+      <input id="global-search" placeholder="Search DR no, vehicle, hybrid, receipt…" oninput="globalSearch(this.value)">
       <span style="font-size:11px;color:var(--ink-5);background:var(--surface-3);padding:1px 6px;border-radius:4px;">⌘K</span>
     </div>
   </div>
@@ -306,7 +306,7 @@
       </div>
       <div class="panel-body">
         <table class="data-table"><thead><tr>
-          <th data-i18n="dash.date">Date</th><th data-i18n="dash.challan">Challan</th><th data-i18n="dash.vehicle">Vehicle</th><th data-i18n="dash.hybrid">Hybrid</th><th data-i18n="dash.qty">Qty</th><th data-i18n="dash.bin">Bin</th><th data-i18n="dash.status">Status</th>
+          <th data-i18n="dash.date">Date</th><th data-i18n="dash.challan">DR No</th><th data-i18n="dash.vehicle">Vehicle</th><th data-i18n="dash.hybrid">Hybrid</th><th data-i18n="dash.qty">Qty</th><th data-i18n="dash.bin">Bin</th><th data-i18n="dash.status">Status</th>
         </tr></thead><tbody id="recent-tbody"></tbody></table>
       </div>
     </div>
@@ -333,7 +333,7 @@
       <div class="page-subtitle">All incoming corn loads — <span id="intake-total-weight" class="fw700 text-gold">0T</span> total</div>
     </div>
     <div class="header-actions">
-      <input class="form-input" id="intake-search" style="width:240px;" placeholder="🔍 Search vehicle, hybrid, challan…" oninput="filterTable('intake-search','intake-full-tbody')">
+      <input class="form-input" id="intake-search" style="width:240px;" placeholder="🔍 Search vehicle, hybrid, DR no…" oninput="filterTable('intake-search','intake-full-tbody')">
       <button class="btn btn-gold" onclick="openIntakeModal()">
         <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
         <span data-i18n="intake.newIntake">New Intake</span>
@@ -342,7 +342,7 @@
   </div>
   <div class="panel">
     <table class="data-table"><thead><tr>
-      <th>#</th><th data-i18n="dash.date">Date & Time</th><th data-i18n="dash.challan">Challan</th><th data-i18n="dash.vehicle">Vehicle</th><th data-i18n="intake.table.location">From</th><th data-i18n="dash.hybrid">Hybrid</th><th data-i18n="intake.table.lot">Lot No</th><th data-i18n="dash.qty">Qty (T)</th><th data-i18n="intake.table.vehWt">Veh. Wt (Kg)</th><th data-i18n="intake.table.grossWt">Gross Wt (Kg)</th><th data-i18n="intake.table.netWt">Net Wt (Kg)</th><th data-i18n="intake.table.moisture">Moisture %</th><th data-i18n="dash.bin">Bin</th><th data-i18n="dash.status">Status</th><th>Actions</th>
+      <th>#</th><th data-i18n="dash.date">Date & Time</th><th data-i18n="dash.challan">DR No</th><th data-i18n="dash.vehicle">Vehicle</th><th data-i18n="intake.table.location">From</th><th data-i18n="dash.hybrid">Hybrid</th><th data-i18n="intake.table.lot">Lot No</th><th data-i18n="dash.qty">Qty</th><th data-i18n="intake.table.vehWt">Veh. Wt (Kg)</th><th data-i18n="intake.table.grossWt">Gross Wt (Kg)</th><th data-i18n="intake.table.netWt">Net Wt (Kg)</th><th data-i18n="intake.table.moisture">Moisture %</th><th data-i18n="dash.bin">Bin</th><th data-i18n="dash.status">Status</th><th>Actions</th>
     </tr></thead><tbody id="intake-full-tbody"></tbody></table>
   </div>
 </div>
@@ -583,7 +583,7 @@
     <div class="modal-body">
       <div class="form-section"><span class="form-section-icon">🚛</span> <span data-i18n="intake.modal.truck">Truck & Transport</span></div>
       <div class="form-row cols2">
-        <div class="form-group"><label class="form-label">Challan No *</label><input class="form-input" id="i-challan" placeholder="e.g. 178"></div>
+        <div class="form-group"><label class="form-label">DR Number *</label><input class="form-input" id="i-challan" placeholder="e.g. 178"></div>
         <div class="form-group"><label class="form-label">From Location</label><input class="form-input" id="i-location" placeholder="Village, Mandal, District"></div>
       </div>
       <div class="form-section" style="font-size:13px;padding:8px 0 4px;">
@@ -606,10 +606,28 @@
           <input class="form-input" id="i-company" placeholder="e.g. Yellina, Crystal…">
         </div>
         <div class="form-group"><label class="form-label">Hybrid / Variety *</label><input class="form-input" id="i-hybrid" placeholder="e.g. YS-07, DS-255"></div>
-        <div class="form-group"><label class="form-label">Lot No</label><input class="form-input" id="i-lot" placeholder="e.g. 025042"></div>
+      </div>
+      <div class="form-section" style="font-size:13px;padding:8px 0 4px;">
+        <span>Lot Numbers</span>
+        <button class="btn btn-ghost" style="float:right; padding:4px 8px; height:auto; min-height:0;" onclick="addLotRow()">+ Add Lot</button>
+      </div>
+      <div id="i-lot-rows">
+        <div class="form-row i-lot-row" style="align-items:flex-end;gap:8px;">
+          <div class="form-group" style="flex:1;"><label class="form-label">Lot No</label><input class="form-input i-lot-input" placeholder="e.g. 025042"></div>
+          <div style="padding-bottom:6px;"><button type="button" class="btn btn-ghost" style="padding:4px 8px;height:auto;min-height:0;color:var(--red);" onclick="removeLotRow(this)" title="Remove">✕</button></div>
+        </div>
       </div>
       <div class="form-row cols3">
-        <div class="form-group"><label class="form-label">Quantity (Tons) *</label><input class="form-input" id="i-qty" type="number" step="0.1" placeholder="35.5"></div>
+        <div class="form-group">
+          <label class="form-label">Quantity *</label>
+          <div style="display:flex;gap:6px;">
+            <input class="form-input" id="i-qty" type="number" step="0.1" placeholder="35.5" style="flex:1;">
+            <select class="form-select" id="i-qty-unit" style="width:80px;">
+              <option value="kg">Kg</option>
+              <option value="tons">Tons</option>
+            </select>
+          </div>
+        </div>
         <div class="form-group"><label class="form-label">No. of Bags</label><input class="form-input" id="i-pkts" type="number" placeholder="92"></div>
         <div class="form-group"><label class="form-label">Entry Moisture %</label><input class="form-input" id="i-moisture" type="number" step="0.1" placeholder="36.6"></div>
       </div>
@@ -917,13 +935,13 @@
 <script src="js/seed.js"></script>
 <script src="js/crypto.js"></script>
 <script src="js/utils.js"></script>
-<script src="js/i18n.js?v=3"></script>
+<script src="js/i18n.js?v=4"></script>
 <script src="js/selects.js"></script>
 <script src="js/binTile.js"></script>
-<script src="js/render.js"></script>
-<script src="js/actions.js?v=4"></script>
+<script src="js/render.js?v=2"></script>
+<script src="js/actions.js?v=5"></script>
 <script src="js/receipt.js"></script>
 <script src="js/clock.js?v=2"></script>
-<script src="js/init.js?v=6"></script>
+<script src="js/init.js?v=7"></script>
 </body>
 </html>

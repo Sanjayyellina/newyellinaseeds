@@ -88,6 +88,7 @@ async function bootApp() {
         hybrid: i.hybrid,
         lot: i.lot || '',
         qty: parseFloat(i.qty) || 0,
+        qty_unit: i.qty_unit || 'kg',
         pkts: parseInt(i.pkts) || 0,
         entryMoisture: parseFloat(i.entry_moisture) || 0,
         lr: i.lr || '',

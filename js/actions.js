@@ -23,7 +23,11 @@ function openIntakeModal() {
   addVehicleRow();
   document.getElementById('i-lr-rows').innerHTML = '';
   addLRRow();
-  ['i-challan','i-location','i-hybrid','i-lot','i-qty','i-pkts','i-moisture','i-remarks','i-datetime'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  document.getElementById('i-lot-rows').innerHTML = '';
+  addLotRow();
+  ['i-challan','i-location','i-hybrid','i-qty','i-pkts','i-moisture','i-remarks','i-datetime'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  const unitSel = document.getElementById('i-qty-unit');
+  if (unitSel) unitSel.value = 'kg';
   document.getElementById('i-company').value = '';
   document.querySelector('#intake-modal .modal-title').textContent = 'New Intake Entry';
   document.querySelector('#intake-modal .btn-solid span').textContent = 'Save Intake';
@@ -40,8 +44,9 @@ function openEditIntakeModal(intakeId) {
   document.getElementById('i-location').value = intake.location || '';
   document.getElementById('i-company').value = intake.company || '';
   document.getElementById('i-hybrid').value = intake.hybrid || '';
-  document.getElementById('i-lot').value = intake.lot || '';
   document.getElementById('i-qty').value = intake.qty || '';
+  const unitSel = document.getElementById('i-qty-unit');
+  if (unitSel) unitSel.value = intake.qty_unit || 'kg';
   document.getElementById('i-pkts').value = intake.pkts || '';
   document.getElementById('i-moisture').value = intake.entryMoisture || '';
   document.getElementById('i-remarks').value = intake.remarks || '';
@@ -71,6 +76,17 @@ function openEditIntakeModal(intakeId) {
     const rows = document.querySelectorAll('.i-lr-row');
     const lastRow = rows[rows.length - 1];
     lastRow.querySelector('.i-lr-input').value = lr;
+  });
+
+  // Populate lot rows
+  document.getElementById('i-lot-rows').innerHTML = '';
+  const lots = (intake.lot || '').split(',').map(l => l.trim()).filter(Boolean);
+  if (lots.length === 0) lots.push('');
+  lots.forEach(lot => {
+    addLotRow();
+    const rows2 = document.querySelectorAll('.i-lot-row');
+    const lastRow2 = rows2[rows2.length - 1];
+    lastRow2.querySelector('.i-lot-input').value = lot;
   });
 
   // Populate bin allocation rows
@@ -160,6 +176,34 @@ function addLRRow() {
   container.appendChild(row);
 }
 
+function addLotRow() {
+  const container = document.getElementById('i-lot-rows');
+  const row = document.createElement('div');
+  row.className = 'form-row i-lot-row';
+  row.style.alignItems = 'flex-end';
+  row.style.gap = '8px';
+  row.style.marginTop = '8px';
+  row.innerHTML = `
+    <div class="form-group" style="flex:1;">
+      <label class="form-label">Lot No</label>
+      <input class="form-input i-lot-input" placeholder="e.g. 025042">
+    </div>
+    <div style="padding-bottom:6px;">
+      <button type="button" class="btn btn-ghost" style="padding:4px 8px;height:auto;min-height:0;color:var(--red);" onclick="removeLotRow(this)" title="Remove">✕</button>
+    </div>`;
+  container.appendChild(row);
+}
+
+function removeLotRow(btn) {
+  const row = btn.closest('.i-lot-row');
+  const container = document.getElementById('i-lot-rows');
+  if (container.querySelectorAll('.i-lot-row').length > 1) {
+    row.remove();
+  } else {
+    row.querySelector('.i-lot-input').value = '';
+  }
+}
+
 function addIntakeBinRow() {
   const container = document.getElementById('i-bin-rows');
   const row = document.createElement('div');
@@ -221,6 +265,18 @@ async function saveIntake(){
   });
   const lr = lrNums.join(', ');
 
+  // Gather multiple Lot numbers
+  const lotRows = document.querySelectorAll('.i-lot-row');
+  let lotNums = [];
+  lotRows.forEach(r => {
+    const l = (r.querySelector('.i-lot-input').value || '').trim();
+    if (l) lotNums.push(l);
+  });
+  const lot = lotNums.join(', ');
+
+  // Get quantity unit
+  const qtyUnit = document.getElementById('i-qty-unit')?.value || 'kg';
+
   if(!challan||!vehicle||!hybrid||!qtyInput){toast('Please fill all required Intake fields (*)','error');return;}
   
   // gather bin allocations
@@ -262,8 +318,9 @@ async function saveIntake(){
       location: document.getElementById('i-location').value,
       company: document.getElementById('i-company').value,
       hybrid,
-      lot: document.getElementById('i-lot').value,
+      lot,
       qty,
+      qty_unit: qtyUnit,
       pkts: parseInt(document.getElementById('i-pkts').value)||0,
       entry_moisture: parseFloat(document.getElementById('i-moisture').value)||0,
       lr,
@@ -332,7 +389,7 @@ async function saveIntake(){
             allocations: allocations.map(a => ({ binId: a.binId, qty: a.qty, pkts: a.pkts }))
           };
         }
-        dbLogActivity('INTAKE_UPDATED', `Intake ${intakeId} updated — ${qty} Tons of ${hybrid} (Challan: ${challan})`);
+        dbLogActivity('INTAKE_UPDATED', `Intake ${intakeId} updated — ${qty} ${qtyUnit} of ${hybrid} (DR: ${challan})`);
       } else {
         const intakeRecord = { id: intakeId, ...intakeFields, created_at: dateStr };
         const entry = {
@@ -348,7 +405,7 @@ async function saveIntake(){
           date: now.toLocaleString('en-IN',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'})
         };
         state.intakes.unshift(entry);
-        dbLogActivity('INTAKE_CREATED', `Intake ${intakeId} created for ${qty} Tons of ${hybrid} (Challan: ${challan})`);
+        dbLogActivity('INTAKE_CREATED', `Intake ${intakeId} created for ${qty} ${qtyUnit} of ${hybrid} (DR: ${challan})`);
       }
 
       allocations.forEach(a => {
@@ -370,7 +427,7 @@ async function saveIntake(){
 
       _editingIntakeId = null;
       closeModal('intake-modal');
-      toast(isEdit ? `Intake updated — Challan ${challan}` : `Intake saved — Challan ${challan}`);
+      toast(isEdit ? `Intake updated — DR ${challan}` : `Intake saved — DR ${challan}`);
       if(window.Store) window.Store.emitChange();
   } else {
       toast(isEdit ? 'Failed to update intake' : 'Failed to save to database', 'error');
@@ -733,7 +790,7 @@ function executeExport() {
       const intakesSheet = XLSX.utils.json_to_sheet(state.intakes.map(i => ({
           IntakeID: i.id,
           Date: i.date,
-          Challan: i.challan,
+          DRNo: i.challan,
           Hybrid: i.hybrid,
           QtyTons: i.qty,
           Bags: i.pkts,

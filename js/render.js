@@ -43,7 +43,7 @@ function renderDashboard(){
       <td><span class="mono fw700 text-gold">${i.challan}</span></td>
       <td class="mono fs12">${i.vehicle}</td>
       <td class="fw700 truncate" style="max-width:160px;">${i.hybrid}</td>
-      <td><span class="fw700 text-gold">${i.qty}T</span></td>
+      <td><span class="fw700 text-gold">${i.qty} ${(i.qty_unit||'T').toUpperCase()}</span></td>
       <td>${(i.bins&&i.bins.length?i.bins:[i.bin]).filter(Boolean).map(b=>`<span class="chip chip-blue">BIN-${b}</span>`).join(' ')||'—'}</td>
       <td><span class="chip chip-blue">Intake</span></td>
     </tr>`).join('')
@@ -61,7 +61,7 @@ function renderDashboard(){
 
 function renderIntakePage(){
   const total=state.intakes.reduce((s,i)=>s+parseFloat(i.qty||0),0);
-  document.getElementById('intake-total-weight').textContent=total.toFixed(2)+'T';
+  document.getElementById('intake-total-weight').textContent=total.toFixed(2);
   document.getElementById('intake-full-tbody').innerHTML=state.intakes.length?state.intakes.map((i,idx)=>`
     <tr>
       <td class="mono text-muted fs12">${idx+1}</td>
@@ -71,7 +71,7 @@ function renderIntakePage(){
       <td class="fs12 text-muted truncate" style="max-width:140px;">${i.location||'—'}</td>
       <td class="fw700">${i.hybrid}</td>
       <td class="mono fs12 text-muted">${i.lot||'—'}</td>
-      <td><span class="fw700 text-gold">${i.qty}T</span></td>
+      <td><span class="fw700 text-gold">${i.qty} ${(i.qty_unit||'T').toUpperCase()}</span></td>
       <td class="mono fs12">${i.vehicleWeight||'—'}</td>
       <td class="mono fs12">${i.grossWeight||'—'}</td>
       <td class="mono fw700" style="color:var(--blue);">${i.netWeight||'—'}</td>
@@ -152,7 +152,7 @@ function renderManagerPage(){
   html += `<button class="btn btn-gold btn-sm" onclick="openIntakeModal()">+ New Intake</button>`;
   html += `</div>`;
   html += `<div class="panel"><table class="data-table"><thead><tr>`;
-  html += `<th>#</th><th>Date</th><th>Challan</th><th>Vehicle</th><th>Hybrid</th><th>Qty (T)</th><th>Bins</th><th>Actions</th>`;
+  html += `<th>#</th><th>Date</th><th>DR No</th><th>Vehicle</th><th>Hybrid</th><th>Qty</th><th>Bins</th><th>Actions</th>`;
   html += `</tr></thead><tbody>`;
   if (state.intakes.length) {
     html += state.intakes.map((i, idx) => `<tr>
@@ -161,7 +161,7 @@ function renderManagerPage(){
       <td><span class="mono fw700 text-gold">${i.challan}</span></td>
       <td class="mono">${i.vehicle}</td>
       <td class="fw700">${i.hybrid}</td>
-      <td><span class="fw700 text-gold">${i.qty}T</span></td>
+      <td><span class="fw700 text-gold">${i.qty} ${(i.qty_unit||'T').toUpperCase()}</span></td>
       <td>${(i.bins&&i.bins.length?i.bins:[i.bin]).filter(Boolean).map(b=>'<span class="chip chip-blue">BIN-'+b+'</span>').join(' ')||'—'}</td>
       <td><button class="btn btn-ghost btn-sm" onclick="openEditIntakeModal('${i.id}')" title="Edit Intake">✏️ Edit</button></td>
     </tr>`).join('');
