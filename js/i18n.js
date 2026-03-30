@@ -28,7 +28,7 @@ const translations = {
     },
     dash: {
       avgDryingTime: 'Avg Drying Time',
-      totalIntake: 'Total Intake (T)',
+      totalIntake: 'Total Intake (Kg)',
       binsReady: 'Bins Ready',
       drying: 'Drying',
       dispatches: 'Dispatches',
@@ -90,7 +90,7 @@ const translations = {
         company: 'Company',
         addBin: '+ Add Bin',
         assignBin: 'Assign to Bin',
-        allocQty: 'Allocated Qty (Tons)',
+        allocQty: 'Allocated Qty (Kg)',
         lr: 'LR Number',
         remarks: 'Remarks',
         save: 'Save Intake'
@@ -152,7 +152,7 @@ const translations = {
       moistureUpdater: 'Manager Moisture Updater'
     },
     analytics: {
-      dailyIntake: 'Daily Intake Volume (Tons)',
+      dailyIntake: 'Daily Intake Volume (Kg)',
       thisWeek: 'this week',
       hybridMix: 'Hybrid Mix',
       moistureCurve: 'Moisture Reduction Curve',
@@ -212,7 +212,7 @@ const translations = {
     },
     dash: {
       avgDryingTime: 'औसत सुखाने का समय',
-      totalIntake: 'कुल आवक (T)',
+      totalIntake: 'कुल आवक (Kg)',
       binsReady: 'बिन तैयार',
       drying: 'सूख रहा है',
       dispatches: 'डिस्पैच',
@@ -396,7 +396,7 @@ const translations = {
     },
     dash: {
       avgDryingTime: 'సగటు ఆరబెట్టే సమయం',
-      totalIntake: 'మొత్తం దిగుమతి (T)',
+      totalIntake: 'మొత్తం దిగుమతి (Kg)',
       binsReady: 'సిద్ధంగా ఉన్న బిన్స్',
       drying: 'ఎండబెట్టడం',
       dispatches: 'డిస్పాచ్‌లు',

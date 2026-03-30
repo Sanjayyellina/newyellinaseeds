@@ -48,6 +48,7 @@ function renderDashboard(){
       <td><span class="fw700 text-gold">${i.qty} Kg</span></td>
       <td>${binIds.map(b=>`<span class="chip chip-blue">BIN-${b}</span>`).join(' ')||'—'}</td>
       <td><span class="chip ${statusChipClass}">${statusLabel}</span></td>
+      <td><button class="btn btn-ghost btn-sm" onclick="openEditIntakeModal('${i.id}')" title="Edit">✏️ Edit</button></td>
     </tr>`;}).join('')
     :`<tr><td colspan="7"><div class="empty-state"><div class="empty-icon">📋</div><div class="empty-title">${t('dash.noIntakes')}</div></div></td></tr>`;
 
