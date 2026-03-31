@@ -1,0 +1,1182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Yellina Seeds — Operations Platform</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<!-- V2 Design System -->
+<link rel="stylesheet" href="css/variables-v2.css?v=1">
+<link rel="stylesheet" href="css/layout-v2.css?v=1">
+<link rel="stylesheet" href="css/components-v2.css?v=1">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#E8940A">
+</head>
+<body>
+
+<!-- ============================================================
+     OFFLINE BAR
+     ============================================================ -->
+<div id="offline-bar" class="offline-bar" style="display:none;">
+  <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="1" y1="1" x2="23" y2="23"/><path d="M16.72 11.06A10.94 10.94 0 0 1 19 12.55M5 12.55a10.94 10.94 0 0 1 5.17-2.39M10.71 5.05A16 16 0 0 1 22.56 9M1.42 9a15.91 15.91 0 0 1 4.7-2.88M8.53 16.11a6 6 0 0 1 6.95 0M12 20h.01"/></svg>
+  <span>You're offline — changes are queued and will sync automatically</span>
+</div>
+
+<!-- ============================================================
+     LOGIN SCREEN
+     ============================================================ -->
+<div id="login-screen" class="login-screen">
+  <div class="login-glow"></div>
+
+  <div class="login-card-wrap">
+    <!-- Brand -->
+    <div class="login-brand">
+      <div class="login-logo-wrap">
+        <img id="login-logo" src="assets/logo.jpg" alt="Yellina Seeds" onerror="this.parentElement.innerHTML='🌾'">
+      </div>
+      <div class="login-brand-name">Yellina Seeds</div>
+      <div class="login-brand-sub">Operations Platform</div>
+    </div>
+
+    <!-- Card -->
+    <div class="login-card">
+      <div class="login-card-header">
+        <div class="login-card-title">Welcome back</div>
+        <div class="login-card-sub">Sign in to continue to your dashboard</div>
+      </div>
+
+      <div id="login-error" class="login-error" style="display:none;"></div>
+
+      <div class="login-fields">
+        <div class="login-field">
+          <label class="login-label">Email</label>
+          <input id="login-email" type="email" class="login-input" placeholder="you@yellinaseeds.com"
+            onkeydown="if(event.key==='Enter')doLogin()">
+        </div>
+        <div class="login-field">
+          <label class="login-label">Password</label>
+          <input id="login-password" type="password" class="login-input" placeholder="••••••••••"
+            onkeydown="if(event.key==='Enter')doLogin()">
+        </div>
+      </div>
+
+      <button id="login-btn" class="login-btn" onclick="doLogin()">Sign In</button>
+
+      <div class="login-footer">
+        <a href="#" onclick="showForgotPassword()" class="login-forgot">Forgot password?</a>
+      </div>
+    </div>
+
+    <div class="login-trust">
+      <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+      Secured by Supabase · All data encrypted at rest
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     APP SHELL
+     ============================================================ -->
+<div id="app-shell" style="display:none;">
+
+<!-- TOPBAR -->
+<header class="topbar">
+  <div class="topbar-left">
+    <button class="mobile-menu-btn" onclick="toggleSidebar()">
+      <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 12h18M3 6h18M3 18h18"/></svg>
+    </button>
+    <div class="topbar-brand">
+      <div class="topbar-logo-wrap">
+        <img src="assets/logo.jpg" alt="" onerror="this.style.display='none'">
+      </div>
+      <div class="topbar-brand-text">
+        <div class="topbar-brand-name">Yellina Seeds</div>
+        <div class="topbar-brand-sub">Operations Platform</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="topbar-center">
+    <div class="topbar-search">
+      <svg class="search-icon" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+      <input type="search" class="search-input" id="global-search-input" placeholder="Search receipts, vehicles, hybrids…" oninput="globalSearch(this.value)">
+      <kbd class="search-kbd">⌘K</kbd>
+    </div>
+  </div>
+
+  <div class="topbar-right">
+    <div id="clock" class="topbar-clock"></div>
+    <div class="lang-picker">
+      <button class="lang-btn active" onclick="changeLanguage('en')">EN</button>
+      <span class="lang-sep">·</span>
+      <button class="lang-btn" onclick="changeLanguage('hi')">हि</button>
+      <span class="lang-sep">·</span>
+      <button class="lang-btn" onclick="changeLanguage('te')">తె</button>
+    </div>
+    <div class="avatar-wrap">
+      <div class="avatar" id="user-avatar" onclick="toggleUserMenu()">U</div>
+      <div class="user-menu" id="user-menu" style="display:none;">
+        <div class="user-menu-header">
+          <div class="user-menu-email" id="user-menu-email">user@yellinaseeds.com</div>
+          <div class="user-menu-role">Operations Staff</div>
+        </div>
+        <div class="user-menu-divider"></div>
+        <button class="user-menu-item danger" onclick="doLogout()">
+          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+          Sign Out
+        </button>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- SIDEBAR -->
+<nav class="sidebar" id="sidebar">
+
+  <!-- OVERVIEW -->
+  <div class="nav-section-label">Overview</div>
+  <div class="nav-item active" onclick="showPage('dashboard',this)">
+    <span class="nav-icon">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+    </span>
+    <span data-i18n="nav.dashboard">Dashboard</span>
+  </div>
+  <div class="nav-item" onclick="showPage('analytics',this)">
+    <span class="nav-icon">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+    </span>
+    <span data-i18n="nav.analytics">Analytics</span>
+  </div>
+
+  <!-- OPERATIONS -->
+  <div class="nav-divider"></div>
+  <div class="nav-section-label" data-i18n="nav.operations">Operations</div>
+  <div class="nav-item" onclick="showPage('intake',this)">
+    <span class="nav-icon">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="1" y="3" width="15" height="13" rx="2"/><path d="M16 8l4 4-4 4M20 12H9"/></svg>
+    </span>
+    <span data-i18n="nav.intake">Intake Register</span>
+  </div>
+  <div class="nav-item" onclick="showPage('bins',this)">
+    <span class="nav-icon">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+    </span>
+    <span data-i18n="nav.binMonitor">Bin Monitor</span>
+  </div>
+
+  <!-- DISPATCH & FINANCE -->
+  <div class="nav-divider"></div>
+  <div class="nav-section-label" data-i18n="nav.logistics">Dispatch & Finance</div>
+  <div class="nav-item" onclick="showPage('dispatch',this)">
+    <span class="nav-icon">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+    </span>
+    <span data-i18n="nav.dispatch">Dispatch</span>
+  </div>
+  <div class="nav-item" onclick="showPage('receipts',this)">
+    <span class="nav-icon">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+    </span>
+    <span data-i18n="nav.receipts">Receipts</span>
+  </div>
+
+  <!-- PLANT OPERATIONS -->
+  <div class="nav-divider"></div>
+  <div class="nav-section-label" data-i18n="nav.plantOperations">Plant Operations</div>
+  <div class="nav-item" onclick="showPage('maintenance',this)">
+    <span class="nav-icon">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/></svg>
+    </span>
+    <span data-i18n="nav.maintenance">Maintenance</span>
+  </div>
+  <div class="nav-item" onclick="showPage('labor',this)">
+    <span class="nav-icon">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+    </span>
+    <span data-i18n="nav.labor">Labor & Shifts</span>
+  </div>
+
+  <!-- SECURITY -->
+  <div class="nav-divider"></div>
+  <div class="nav-section-label" data-i18n="nav.security">Security</div>
+  <div class="nav-item" onclick="showPage('verify',this)">
+    <span class="nav-icon">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+    </span>
+    <span data-i18n="nav.verifyReceipt">Verify Receipt</span>
+  </div>
+  <div class="nav-item" onclick="showManagerAccess(this)" style="color:var(--brand);">
+    <span class="nav-icon">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+    </span>
+    <span data-i18n="nav.managerAccess">Manager Access</span>
+  </div>
+
+  <!-- Sign Out -->
+  <div class="nav-divider"></div>
+  <div class="nav-item" onclick="doLogout()" style="color:var(--danger-text);margin-top:auto;">
+    <span class="nav-icon">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+    </span>
+    <span>Sign Out</span>
+  </div>
+
+  <!-- Sidebar Footer -->
+  <div class="sidebar-footer">
+    <div class="company-card">
+      <div class="company-card-top">
+        <img src="assets/logo.jpg" alt="" onerror="this.style.display='none'">
+        <div class="company-name">Yellina Seeds Pvt. Ltd.</div>
+      </div>
+      <div class="company-meta">Sathupally, Khammam Dist.</div>
+      <div class="company-meta">GSTIN: 36AABCY8231F1ZB</div>
+    </div>
+  </div>
+
+</nav>
+
+<!-- ============================================================
+     MAIN CONTENT
+     ============================================================ -->
+<main class="main">
+<div class="page-wrap">
+
+<!-- ==================== DASHBOARD ==================== -->
+<div id="page-dashboard" class="page active">
+  <div class="page-header">
+    <div class="page-title-wrap">
+      <div class="page-eyebrow">Operations Center</div>
+      <div class="page-title">Good morning — Here's your plant status</div>
+      <div class="page-subtitle" id="dash-date"></div>
+    </div>
+    <div class="header-actions">
+      <button class="btn btn-ghost" onclick="showPage('analytics',document.querySelector('.nav-item:nth-child(3)'))">
+        <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        Analytics
+      </button>
+    </div>
+  </div>
+
+  <!-- KPI Grid -->
+  <div class="kpi-grid" id="kpi-grid">
+    <div class="kpi-card">
+      <div class="kpi-top">
+        <div class="kpi-icon-wrap kpi-icon-brand">
+          <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
+        </div>
+        <div class="kpi-trend-badge trend-up" id="kpi-intake-d">↑ Today</div>
+      </div>
+      <div class="kpi-value" id="kpi-intake">0</div>
+      <div class="kpi-label">Total Intake (Kg)</div>
+      <div class="kpi-sparkline"></div>
+    </div>
+
+    <div class="kpi-card">
+      <div class="kpi-top">
+        <div class="kpi-icon-wrap kpi-icon-warning">
+          <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 2a7 7 0 017 7c0 5.25-7 13-7 13S5 14.25 5 9a7 7 0 017-7z"/><circle cx="12" cy="9" r="2.5"/></svg>
+        </div>
+        <div class="kpi-trend-badge trend-flat">Active</div>
+      </div>
+      <div class="kpi-value" id="kpi-drying">0</div>
+      <div class="kpi-label" data-i18n="dash.drying">Drying Bins</div>
+      <div class="kpi-sparkline"></div>
+    </div>
+
+    <div class="kpi-card">
+      <div class="kpi-top">
+        <div class="kpi-icon-wrap kpi-icon-info">
+          <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+        </div>
+        <div class="kpi-trend-badge trend-up">Verified</div>
+      </div>
+      <div class="kpi-value" id="kpi-dispatched">0</div>
+      <div class="kpi-label" data-i18n="dash.dispatches">Receipts Issued</div>
+      <div class="kpi-sparkline"></div>
+    </div>
+
+    <div class="kpi-card">
+      <div class="kpi-top">
+        <div class="kpi-icon-wrap kpi-icon-success">
+          <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 2.69l5.66 5.66a8 8 0 11-11.31 0z"/></svg>
+        </div>
+        <div class="kpi-trend-badge trend-flat" id="kpi-moisture-d">Active bins</div>
+      </div>
+      <div class="kpi-value" id="kpi-moisture">—</div>
+      <div class="kpi-label" data-i18n="dash.avgDryingMs">Avg Moisture %</div>
+      <div class="kpi-sparkline"></div>
+    </div>
+  </div>
+
+  <!-- Bin Overview -->
+  <div class="section-hdr">
+    <div>
+      <div class="section-title">Bin Overview</div>
+      <div class="section-sub">All 20 drying chambers — click any bin to update</div>
+    </div>
+    <div class="section-hdr-actions">
+      <span class="badge badge-blue"><span class="badge-dot"></span>Intake</span>
+      <span class="badge badge-warning"><span class="badge-dot"></span>Drying</span>
+      <span class="badge badge-purple"><span class="badge-dot"></span>Shelling</span>
+      <span class="badge badge-neutral"><span class="badge-dot"></span>Empty</span>
+    </div>
+  </div>
+  <div class="bins-master" id="dash-bins"></div>
+
+  <!-- Quick Stats Bar -->
+  <div class="quick-stats-bar">
+    <div class="quick-stat">
+      <div class="quick-stat-val" id="qs-active-bins">—</div>
+      <div class="quick-stat-label">Active Bins</div>
+    </div>
+    <div class="quick-stat-divider"></div>
+    <div class="quick-stat">
+      <div class="quick-stat-val" id="qs-total-kg">—</div>
+      <div class="quick-stat-label">Total Kg In Bins</div>
+    </div>
+    <div class="quick-stat-divider"></div>
+    <div class="quick-stat">
+      <div class="quick-stat-val" id="qs-avg-moisture">—</div>
+      <div class="quick-stat-label">Avg Moisture</div>
+    </div>
+    <div class="quick-stat-divider"></div>
+    <div class="quick-stat">
+      <div class="quick-stat-val" id="qs-empty-bins">—</div>
+      <div class="quick-stat-label">Empty Bins</div>
+    </div>
+  </div>
+
+  <!-- Recent Tables -->
+  <div class="grid2">
+    <div class="panel">
+      <div class="panel-header">
+        <div class="panel-title" data-i18n="dash.recentIntakes">Recent Intakes</div>
+        <button class="btn btn-ghost btn-sm" onclick="showPage('intake',document.querySelectorAll('.nav-item')[3])">View All</button>
+      </div>
+      <div class="table-wrap">
+        <table class="data-table" style="min-width:540px;">
+          <thead><tr>
+            <th data-i18n="dash.date">Date</th>
+            <th data-i18n="dash.challan">DR No</th>
+            <th data-i18n="dash.vehicle">Vehicle</th>
+            <th data-i18n="dash.hybrid">Hybrid</th>
+            <th data-i18n="dash.qty">Qty</th>
+            <th data-i18n="dash.bin">Bin</th>
+            <th data-i18n="dash.status">Status</th>
+            <th class="col-actions"></th>
+          </tr></thead>
+          <tbody id="recent-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="panel-header">
+        <div class="panel-title" data-i18n="dash.recentDispatches">Recent Dispatches</div>
+        <button class="btn btn-ghost btn-sm" onclick="showPage('dispatch',document.querySelectorAll('.nav-item')[5])">View All</button>
+      </div>
+      <div class="table-wrap">
+        <table class="data-table">
+          <thead><tr>
+            <th data-i18n="dash.receipt">Receipt ID</th>
+            <th data-i18n="dispatch.modal.party">Party</th>
+            <th data-i18n="dash.bags">Bags</th>
+            <th data-i18n="dash.amount">Amount</th>
+          </tr></thead>
+          <tbody id="recent-dispatch-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== INTAKE ==================== -->
+<div id="page-intake" class="page">
+  <div class="page-header">
+    <div class="page-title-wrap">
+      <div class="page-eyebrow">Logistics</div>
+      <div class="page-title">Intake Register</div>
+      <div class="page-subtitle">All incoming corn loads — <span id="intake-total-weight" class="fw700 text-brand">0 Kg</span> total</div>
+    </div>
+    <div class="header-actions">
+      <input class="form-input search-bar-input" id="intake-search" placeholder="Search vehicle, hybrid, DR no…" oninput="filterTable('intake-search','intake-full-tbody')">
+      <button class="btn btn-primary" onclick="openIntakeModal()">
+        <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+        <span data-i18n="intake.newIntake">New Intake</span>
+      </button>
+    </div>
+  </div>
+  <div class="panel">
+    <div class="table-wrap">
+      <table class="data-table">
+        <thead><tr>
+          <th>#</th>
+          <th data-i18n="dash.date">Date & Time</th>
+          <th data-i18n="dash.challan">DR No</th>
+          <th data-i18n="dash.vehicle">Vehicle</th>
+          <th data-i18n="intake.table.location">From</th>
+          <th data-i18n="dash.hybrid">Hybrid</th>
+          <th data-i18n="intake.table.lot">Lot No</th>
+          <th data-i18n="dash.qty">Qty (Kg)</th>
+          <th data-i18n="intake.table.vehWt">Veh. Wt</th>
+          <th data-i18n="intake.table.grossWt">Gross Wt</th>
+          <th data-i18n="intake.table.netWt">Net Wt</th>
+          <th data-i18n="intake.table.moisture">Moisture %</th>
+          <th data-i18n="dash.bin">Bin</th>
+          <th data-i18n="dash.status">Status</th>
+          <th class="col-actions">Actions</th>
+        </tr></thead>
+        <tbody id="intake-full-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== BINS ==================== -->
+<div id="page-bins" class="page">
+  <div class="page-header">
+    <div class="page-title-wrap">
+      <div class="page-eyebrow">Plant Operations</div>
+      <div class="page-title" data-i18n="nav.binMonitor">Bin Monitor</div>
+      <div class="page-subtitle">Click any bin to update moisture, airflow, or status</div>
+    </div>
+    <div class="header-actions">
+      <span class="badge badge-blue"><span class="badge-dot"></span><span data-i18n="bins.status.intake">Intake</span></span>
+      <span class="badge badge-warning"><span class="badge-dot"></span><span data-i18n="bins.status.drying">Drying</span></span>
+      <span class="badge badge-purple"><span class="badge-dot"></span><span data-i18n="bins.status.shelling">Shelling</span></span>
+      <span class="badge badge-neutral"><span class="badge-dot"></span>Empty</span>
+    </div>
+  </div>
+  <div class="bins-master" id="bins-full-grid"></div>
+</div>
+
+<!-- ==================== MAINTENANCE ==================== -->
+<div id="page-maintenance" class="page">
+  <div class="page-header">
+    <div class="page-title-wrap">
+      <div class="page-eyebrow">Plant Operations</div>
+      <div class="page-title" data-i18n="nav.maintenance">Maintenance Log</div>
+      <div class="page-subtitle" data-i18n="maint.subtitle">Record and track equipment maintenance and purchases.</div>
+    </div>
+    <div class="header-actions">
+      <button class="btn btn-primary" onclick="openModal('maintenance-modal')">
+        <svg width="13" height="13" fill="currentColor" viewBox="0 0 20 20"><path d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z"/></svg>
+        <span data-i18n="maint.newLog">New Log</span>
+      </button>
+    </div>
+  </div>
+  <div class="panel">
+    <div class="table-wrap">
+      <table class="data-table" id="maintenance-table">
+        <thead><tr>
+          <th data-i18n="maint.date">Date</th>
+          <th data-i18n="maint.reportedBy">Reported By</th>
+          <th data-i18n="maint.workDone">Work Done</th>
+          <th data-i18n="maint.equipment">Equipment</th>
+          <th data-i18n="maint.issue">Issue</th>
+          <th data-i18n="maint.cost">Cost (₹)</th>
+          <th data-i18n="maint.status">Status</th>
+        </tr></thead>
+        <tbody id="maintenance-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== LABOR & SHIFTS ==================== -->
+<div id="page-labor" class="page">
+  <div class="page-header">
+    <div class="page-title-wrap">
+      <div class="page-eyebrow">Plant Operations</div>
+      <div class="page-title" data-i18n="nav.labor">Labor & Shifts</div>
+      <div class="page-subtitle" data-i18n="labor.subtitle">Track daily labor distribution and headcounts.</div>
+    </div>
+    <div class="header-actions">
+      <button class="btn btn-primary" onclick="openModal('labor-modal')">
+        <svg width="13" height="13" fill="currentColor" viewBox="0 0 20 20"><path d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z"/></svg>
+        <span data-i18n="labor.newLog">New Labor Log</span>
+      </button>
+    </div>
+  </div>
+  <div class="panel">
+    <div class="table-wrap">
+      <table class="data-table" id="labor-table">
+        <thead><tr>
+          <th data-i18n="maint.date">Date</th>
+          <th data-i18n="labor.shift">Shift</th>
+          <th data-i18n="labor.role">Role/Area</th>
+          <th data-i18n="labor.headcount">Headcount</th>
+          <th data-i18n="labor.people">People (Names)</th>
+          <th data-i18n="labor.remarks">Remarks</th>
+        </tr></thead>
+        <tbody id="labor-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== DISPATCH ==================== -->
+<div id="page-dispatch" class="page">
+  <div class="page-header">
+    <div class="page-title-wrap">
+      <div class="page-eyebrow" data-i18n="nav.logistics">Logistics</div>
+      <div class="page-title" data-i18n="dispatch.title">Dispatch & Receipts</div>
+      <div class="page-subtitle">Generate cryptographically signed, tamper-proof receipts</div>
+    </div>
+    <div class="header-actions">
+      <button class="btn btn-primary" onclick="openDispatchModal()">
+        <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+        <span data-i18n="dispatch.newDispatch">New Dispatch</span>
+      </button>
+    </div>
+  </div>
+  <div class="panel">
+    <div class="table-wrap">
+      <table class="data-table">
+        <thead><tr>
+          <th data-i18n="dash.receipt">Receipt ID</th>
+          <th data-i18n="dash.date">Date</th>
+          <th data-i18n="dispatch.modal.party">To Party</th>
+          <th data-i18n="dash.hybrid">Hybrid</th>
+          <th data-i18n="dash.bags">Bags</th>
+          <th data-i18n="dispatch.modal.totalQty">Qty (Kg)</th>
+          <th data-i18n="dispatch.modal.moisture">Moisture %</th>
+          <th data-i18n="dash.amount">Amount</th>
+          <th data-i18n="dash.vehicle">Vehicle</th>
+          <th>Verified</th>
+          <th class="col-actions"></th>
+        </tr></thead>
+        <tbody id="dispatch-full-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== RECEIPTS ==================== -->
+<div id="page-receipts" class="page">
+  <div class="page-header">
+    <div class="page-title-wrap">
+      <div class="page-eyebrow" data-i18n="nav.logistics">Documents</div>
+      <div class="page-title" data-i18n="receipts.title">Receipt Archive</div>
+    </div>
+  </div>
+  <div id="receipts-grid" class="receipts-grid"></div>
+</div>
+
+<!-- ==================== MANAGER ACCESS ==================== -->
+<div id="page-manager" class="page">
+  <div class="page-header">
+    <div class="page-title-wrap">
+      <div class="page-eyebrow" data-i18n="nav.security">Administration</div>
+      <div class="page-title" data-i18n="manager.title">Manager Access</div>
+      <div class="page-subtitle">Elevated privileges for bin control and moisture updates.</div>
+    </div>
+  </div>
+  <div id="manager-content-area"></div>
+</div>
+
+<!-- ==================== VERIFY ==================== -->
+<div id="page-verify" class="page">
+  <div class="page-header">
+    <div class="page-title-wrap">
+      <div class="page-eyebrow" data-i18n="nav.security">Security</div>
+      <div class="page-title" data-i18n="receipts.verify">Verify Receipt Authenticity</div>
+      <div class="page-subtitle">Instantly detect if a receipt has been tampered with</div>
+    </div>
+  </div>
+  <div class="verify-card">
+    <div class="verify-how-it-works">
+      <span class="verify-icon">🔐</span>
+      <div>
+        <div class="verify-how-title">How it works</div>
+        <div class="verify-how-body">Every receipt has a unique cryptographic hash. Even changing one character (amount, bags, party name) will invalidate it instantly.</div>
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label" data-i18n="dash.receipt">Receipt ID or Hash</label>
+      <input class="form-input mono-input" id="verify-input" placeholder="YDS-2026-001001  or paste full hash string…">
+    </div>
+    <button class="btn btn-primary mt16 full-width" onclick="verifyReceipt()">
+      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+      Verify Authenticity
+    </button>
+    <div id="verify-result"></div>
+  </div>
+</div>
+
+<!-- ==================== ANALYTICS ==================== -->
+<div id="page-analytics" class="page">
+  <div class="page-header">
+    <div class="page-title-wrap">
+      <div class="page-eyebrow" data-i18n="nav.analytics">Intelligence</div>
+      <div class="page-title" data-i18n="nav.analytics">Analytics & Insights</div>
+    </div>
+    <div class="header-actions">
+      <div class="analytics-range-label" id="analytics-range">Last 7 days</div>
+      <button class="btn btn-primary" onclick="openModal('export-modal')">
+        <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+        <span data-i18n="actions.export">Export to Excel</span>
+      </button>
+    </div>
+  </div>
+
+  <div class="kpi-grid" id="analytics-kpis">
+    <div class="kpi-card">
+      <div class="kpi-top"><div class="kpi-icon-wrap kpi-icon-brand"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5"/></svg></div></div>
+      <div class="kpi-value" id="a-total">—</div>
+      <div class="kpi-label" data-i18n="dash.totalIntake">Total Intake (Kg)</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-top"><div class="kpi-icon-wrap kpi-icon-success"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div></div>
+      <div class="kpi-value" id="a-disp">—</div>
+      <div class="kpi-label" data-i18n="dash.dispatches">Dispatches</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-top"><div class="kpi-icon-wrap kpi-icon-warning"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 2.69l5.66 5.66a8 8 0 11-11.31 0z"/></svg></div></div>
+      <div class="kpi-value">7.2%</div>
+      <div class="kpi-label" data-i18n="dash.avgDryingMs">Avg Moisture Drop</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-top"><div class="kpi-icon-wrap kpi-icon-info"><svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div></div>
+      <div class="kpi-value">6.1d</div>
+      <div class="kpi-label" data-i18n="dash.avgDryingTime">Avg Drying Time</div>
+    </div>
+  </div>
+
+  <div class="analytics-grid mb16">
+    <div class="chart-panel">
+      <div class="chart-title">
+        <span data-i18n="analytics.dailyIntake">Daily Intake Volume (Kg)</span>
+        <span class="chart-subtitle" data-i18n="analytics.thisWeek">this week</span>
+      </div>
+      <div class="bar-chart-wrap" id="intake-bar-chart"></div>
+      <div class="chart-x-axis"></div>
+    </div>
+    <div class="chart-panel">
+      <div class="chart-title" data-i18n="analytics.hybridMix">Hybrid Mix</div>
+      <div class="donut-wrap mt16" id="hybrid-donut"></div>
+    </div>
+  </div>
+
+  <div class="analytics-grid-3">
+    <div class="chart-panel">
+      <div class="chart-title" data-i18n="analytics.moistureCurve">Moisture Reduction Curve</div>
+      <div class="progress-list mt16" id="moisture-curve"></div>
+    </div>
+    <div class="chart-panel">
+      <div class="chart-title" data-i18n="analytics.dispatchPerf">Dispatch Performance</div>
+      <div id="dispatch-perf" style="margin-top:12px;"></div>
+    </div>
+    <div class="chart-panel">
+      <div class="chart-title" data-i18n="analytics.binUtil">Bin Utilization</div>
+      <div id="bin-util-chart" style="text-align:center;padding-top:10px;"></div>
+    </div>
+  </div>
+</div>
+
+</div><!-- /page-wrap -->
+</main>
+
+<!-- ============================================================
+     MODALS
+     ============================================================ -->
+
+<!-- INTAKE MODAL -->
+<div class="overlay" id="intake-modal" style="display:none;" onclick="if(event.target===this)closeModal('intake-modal')">
+  <div class="modal modal-lg">
+    <div class="modal-header">
+      <div>
+        <div class="modal-title" data-i18n="intake.modal.title">New Intake Entry</div>
+        <div class="modal-sub">Log incoming corn load with vehicle and lot details</div>
+      </div>
+      <button class="modal-close" onclick="closeModal('intake-modal')">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+
+      <!-- Row 1: Date + DR Number + Hybrid -->
+      <div class="form-row form-row-3">
+        <div class="form-group">
+          <label class="form-label" data-i18n="intake.modal.date">Date & Time</label>
+          <input class="form-input" id="i-date" type="datetime-local">
+        </div>
+        <div class="form-group">
+          <label class="form-label" data-i18n="intake.modal.drNo">DR Number</label>
+          <input class="form-input" id="i-challan" type="text" placeholder="DR-2026-001">
+        </div>
+        <div class="form-group">
+          <label class="form-label" data-i18n="dash.hybrid">Hybrid</label>
+          <input class="form-input" id="i-hybrid" type="text" placeholder="e.g. CML-07">
+        </div>
+      </div>
+
+      <!-- Row 2: From Location + Moisture -->
+      <div class="form-row form-row-2">
+        <div class="form-group">
+          <label class="form-label" data-i18n="intake.modal.from">From Location</label>
+          <input class="form-input" id="i-loc" type="text" placeholder="Village / Farm name">
+        </div>
+        <div class="form-group">
+          <label class="form-label" data-i18n="intake.modal.moisture">Moisture % (Intake)</label>
+          <input class="form-input" id="i-moisture" type="number" step="0.1" min="0" max="100" placeholder="e.g. 24.5">
+        </div>
+      </div>
+
+      <!-- Row 3: Weight data -->
+      <div class="form-row form-row-3">
+        <div class="form-group">
+          <label class="form-label" data-i18n="intake.modal.grossWt">Gross Weight (Kg)</label>
+          <input class="form-input" id="i-gross-wt" type="number" step="0.1" placeholder="0">
+        </div>
+        <div class="form-group">
+          <label class="form-label" data-i18n="intake.modal.vehicleWt">Vehicle Weight (Kg)</label>
+          <input class="form-input" id="i-veh-wt" type="number" step="0.1" placeholder="0">
+        </div>
+        <div class="form-group">
+          <label class="form-label" data-i18n="intake.modal.netWt">Net Weight (Kg)</label>
+          <input class="form-input" id="i-net-wt" type="number" step="0.1" placeholder="Auto-calculated" readonly>
+        </div>
+      </div>
+
+      <!-- Vehicles Section -->
+      <div class="multi-row-section">
+        <div class="multi-row-header">
+          <div class="multi-row-title">
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="1" y="3" width="15" height="13" rx="2"/><path d="M16 8l4 4-4 4M20 12H9"/></svg>
+            Vehicles & LR Numbers
+          </div>
+          <button type="button" class="add-row-btn" onclick="addVehicleRow()">
+            <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+            Add Vehicle
+          </button>
+        </div>
+        <div id="i-vehicle-rows" class="multi-row-body"></div>
+      </div>
+
+      <!-- Lots Section -->
+      <div class="multi-row-section">
+        <div class="multi-row-header">
+          <div class="multi-row-title">
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
+            Lot Numbers
+          </div>
+          <button type="button" class="add-row-btn" onclick="addLotRow()">
+            <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+            Add Lot
+          </button>
+        </div>
+        <div id="i-lot-rows" class="multi-row-body"></div>
+      </div>
+
+      <!-- Bins Section -->
+      <div class="multi-row-section">
+        <div class="multi-row-header">
+          <div class="multi-row-title">
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg>
+            Bin Allocation
+          </div>
+          <button type="button" class="add-row-btn" onclick="addIntakeBinRow()">
+            <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+            Add Bin
+          </button>
+        </div>
+        <div id="i-bin-rows" class="multi-row-body"></div>
+      </div>
+
+      <!-- Notes -->
+      <div class="form-group">
+        <label class="form-label" data-i18n="intake.modal.notes">Notes / Remarks</label>
+        <textarea class="form-input form-textarea" id="i-notes" rows="2" placeholder="Optional notes…"></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('intake-modal')" data-i18n="actions.cancel">Cancel</button>
+      <button class="btn btn-primary" id="save-intake-btn" onclick="saveIntake()" data-i18n="actions.save">Save Intake</button>
+    </div>
+  </div>
+</div>
+
+<!-- BIN UPDATE MODAL -->
+<div class="overlay" id="bin-modal" style="display:none;" onclick="if(event.target===this)closeModal('bin-modal')">
+  <div class="modal">
+    <div class="modal-header">
+      <div>
+        <div class="modal-title" id="bin-modal-title">Update Bin</div>
+        <div class="modal-sub" id="bin-modal-sub">Adjust moisture, airflow, and status</div>
+      </div>
+      <button class="modal-close" onclick="closeModal('bin-modal')">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="bin-modal-id">
+      <div class="form-row form-row-2">
+        <div class="form-group">
+          <label class="form-label" data-i18n="bins.modal.status">Status</label>
+          <select class="form-input" id="bin-modal-status">
+            <option value="empty">Empty</option>
+            <option value="intake">Intake</option>
+            <option value="drying">Drying</option>
+            <option value="shelling">Shelling</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label" data-i18n="bins.modal.moisture">Current Moisture %</label>
+          <input class="form-input moisture-large-input" id="bin-modal-moisture" type="number" step="0.1" min="0" max="100" placeholder="0.0">
+        </div>
+      </div>
+      <div class="form-row form-row-2">
+        <div class="form-group">
+          <label class="form-label" data-i18n="bins.modal.airflow">Airflow</label>
+          <div class="airflow-toggle">
+            <button type="button" id="airflow-on" class="airflow-btn active" onclick="setAirflow(true)">ON</button>
+            <button type="button" id="airflow-off" class="airflow-btn" onclick="setAirflow(false)">OFF</button>
+          </div>
+          <input type="hidden" id="bin-modal-airflow" value="true">
+        </div>
+        <div class="form-group">
+          <label class="form-label" data-i18n="bins.modal.target">Target Moisture %</label>
+          <input class="form-input" id="bin-modal-target" type="number" step="0.1" min="0" max="100" placeholder="12.0">
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label" data-i18n="bins.modal.notes">Notes</label>
+        <textarea class="form-input form-textarea" id="bin-modal-notes" rows="2" placeholder="Optional…"></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('bin-modal')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveBinUpdate()" data-i18n="actions.save">Save Changes</button>
+    </div>
+  </div>
+</div>
+
+<!-- DISPATCH MODAL -->
+<div class="overlay" id="dispatch-modal" style="display:none;" onclick="if(event.target===this)closeModal('dispatch-modal')">
+  <div class="modal modal-lg">
+    <div class="modal-header">
+      <div>
+        <div class="modal-title" data-i18n="dispatch.modal.title">New Dispatch</div>
+        <div class="modal-sub">Generate a tamper-proof signed receipt</div>
+      </div>
+      <button class="modal-close" onclick="closeModal('dispatch-modal')">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div class="form-row form-row-2">
+        <div class="form-group">
+          <label class="form-label" data-i18n="dispatch.modal.date">Date</label>
+          <input class="form-input" id="d-date" type="date">
+        </div>
+        <div class="form-group">
+          <label class="form-label" data-i18n="dispatch.modal.party">To Party</label>
+          <input class="form-input" id="d-party" type="text" placeholder="Buyer / party name">
+        </div>
+      </div>
+      <div class="form-row form-row-2">
+        <div class="form-group">
+          <label class="form-label" data-i18n="dash.hybrid">Hybrid</label>
+          <input class="form-input" id="d-hybrid" type="text" placeholder="CML-07">
+        </div>
+        <div class="form-group">
+          <label class="form-label" data-i18n="dispatch.modal.vehicle">Vehicle No</label>
+          <input class="form-input" id="d-vehicle" type="text" placeholder="AP 09 AA 0000">
+        </div>
+      </div>
+      <div class="form-row form-row-3">
+        <div class="form-group">
+          <label class="form-label" data-i18n="dispatch.modal.totalQty">Total Qty (Kg)</label>
+          <input class="form-input" id="d-qty" type="number" step="0.01" placeholder="0">
+        </div>
+        <div class="form-group">
+          <label class="form-label" data-i18n="dash.bags">No. of Bags</label>
+          <input class="form-input" id="d-bags" type="number" placeholder="0">
+        </div>
+        <div class="form-group">
+          <label class="form-label" data-i18n="dispatch.modal.moisture">Final Moisture %</label>
+          <input class="form-input" id="d-moisture" type="number" step="0.1" placeholder="12.0">
+        </div>
+      </div>
+      <div class="form-row form-row-2">
+        <div class="form-group">
+          <label class="form-label" data-i18n="dispatch.modal.rate">Rate (₹/Kg)</label>
+          <input class="form-input" id="d-rate" type="number" step="0.01" placeholder="0.00">
+        </div>
+        <div class="form-group">
+          <label class="form-label" data-i18n="dispatch.modal.totalAmt">Total Amount (₹)</label>
+          <input class="form-input" id="d-amount" type="number" step="0.01" placeholder="Auto-calculated" readonly>
+        </div>
+      </div>
+
+      <!-- Dispatch Bins -->
+      <div class="multi-row-section">
+        <div class="multi-row-header">
+          <div class="multi-row-title">Bin Allocation</div>
+          <button type="button" class="add-row-btn" onclick="addDispatchBinRow()">
+            <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+            Add Bin
+          </button>
+        </div>
+        <div id="d-bin-rows" class="multi-row-body"></div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" data-i18n="intake.modal.notes">Notes</label>
+        <textarea class="form-input form-textarea" id="d-notes" rows="2" placeholder="Optional…"></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('dispatch-modal')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveDispatch()">Generate Receipt</button>
+    </div>
+  </div>
+</div>
+
+<!-- MAINTENANCE MODAL -->
+<div class="overlay" id="maintenance-modal" style="display:none;" onclick="if(event.target===this)closeModal('maintenance-modal')">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title" data-i18n="maint.newLog">New Maintenance Log</div>
+      <button class="modal-close" onclick="closeModal('maintenance-modal')">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div class="form-row form-row-2">
+        <div class="form-group">
+          <label class="form-label" data-i18n="maint.date">Date</label>
+          <input class="form-input" id="m-date" type="date">
+        </div>
+        <div class="form-group">
+          <label class="form-label" data-i18n="maint.reportedBy">Reported By</label>
+          <input class="form-input" id="m-reported-by" type="text" placeholder="Name">
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label" data-i18n="maint.equipment">Equipment</label>
+        <input class="form-input" id="m-equipment" type="text" placeholder="Dryer fan, motor, etc.">
+      </div>
+      <div class="form-group">
+        <label class="form-label" data-i18n="maint.issue">Issue / Description</label>
+        <textarea class="form-input form-textarea" id="m-issue" rows="2" placeholder="Describe the issue…"></textarea>
+      </div>
+      <div class="form-group">
+        <label class="form-label" data-i18n="maint.workDone">Work Done</label>
+        <textarea class="form-input form-textarea" id="m-work-done" rows="2" placeholder="What was repaired / replaced…"></textarea>
+      </div>
+      <div class="form-row form-row-2">
+        <div class="form-group">
+          <label class="form-label" data-i18n="maint.cost">Cost (₹)</label>
+          <input class="form-input" id="m-cost" type="number" step="0.01" placeholder="0.00">
+        </div>
+        <div class="form-group">
+          <label class="form-label" data-i18n="maint.status">Status</label>
+          <select class="form-input" id="m-status">
+            <option value="open">Open</option>
+            <option value="in-progress">In Progress</option>
+            <option value="resolved">Resolved</option>
+          </select>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('maintenance-modal')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveMaintenanceLog()" data-i18n="actions.save">Save Log</button>
+    </div>
+  </div>
+</div>
+
+<!-- LABOR MODAL -->
+<div class="overlay" id="labor-modal" style="display:none;" onclick="if(event.target===this)closeModal('labor-modal')">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title" data-i18n="labor.newLog">New Labor Log</div>
+      <button class="modal-close" onclick="closeModal('labor-modal')">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div class="form-row form-row-2">
+        <div class="form-group">
+          <label class="form-label" data-i18n="maint.date">Date</label>
+          <input class="form-input" id="l-date" type="date">
+        </div>
+        <div class="form-group">
+          <label class="form-label" data-i18n="labor.shift">Shift</label>
+          <select class="form-input" id="l-shift">
+            <option value="morning">Morning</option>
+            <option value="afternoon">Afternoon</option>
+            <option value="night">Night</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row form-row-2">
+        <div class="form-group">
+          <label class="form-label" data-i18n="labor.role">Role / Area</label>
+          <input class="form-input" id="l-role" type="text" placeholder="Drying floor, sorting, loading…">
+        </div>
+        <div class="form-group">
+          <label class="form-label" data-i18n="labor.headcount">Headcount</label>
+          <input class="form-input" id="l-headcount" type="number" min="1" placeholder="0">
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label" data-i18n="labor.people">People (Names)</label>
+        <textarea class="form-input form-textarea" id="l-people" rows="2" placeholder="Comma-separated names…"></textarea>
+      </div>
+      <div class="form-group">
+        <label class="form-label" data-i18n="labor.remarks">Remarks</label>
+        <textarea class="form-input form-textarea" id="l-remarks" rows="2" placeholder="Optional…"></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('labor-modal')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveLaborLog()" data-i18n="actions.save">Save Log</button>
+    </div>
+  </div>
+</div>
+
+<!-- EXPORT MODAL -->
+<div class="overlay" id="export-modal" style="display:none;" onclick="if(event.target===this)closeModal('export-modal')">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title" data-i18n="actions.export">Export to Excel</div>
+      <button class="modal-close" onclick="closeModal('export-modal')">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label class="form-label">Date Range</label>
+        <div class="form-row form-row-2">
+          <input class="form-input" id="export-from" type="date">
+          <input class="form-input" id="export-to" type="date">
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Export Type</label>
+        <div class="checkbox-group">
+          <label class="checkbox-item"><input type="checkbox" id="exp-intakes" checked> Intakes</label>
+          <label class="checkbox-item"><input type="checkbox" id="exp-dispatch" checked> Dispatches</label>
+          <label class="checkbox-item"><input type="checkbox" id="exp-maint"> Maintenance Logs</label>
+          <label class="checkbox-item"><input type="checkbox" id="exp-labor"> Labor Logs</label>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('export-modal')">Cancel</button>
+      <button class="btn btn-primary" onclick="exportToExcel()">
+        <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+        Download Excel
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- RECEIPT VIEWER MODAL -->
+<div class="overlay" id="receipt-modal" style="display:none;" onclick="if(event.target===this)closeModal('receipt-modal')">
+  <div class="modal modal-lg">
+    <div class="modal-header">
+      <div class="modal-title">Receipt</div>
+      <div class="header-actions">
+        <button class="btn btn-ghost btn-sm" onclick="printReceipt()">
+          <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+          Print
+        </button>
+        <button class="modal-close" onclick="closeModal('receipt-modal')">
+          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg>
+        </button>
+      </div>
+    </div>
+    <div class="modal-body" id="receipt-content"></div>
+  </div>
+</div>
+
+<!-- MANAGER PIN MODAL -->
+<div class="overlay" id="manager-pin-modal" style="display:none;">
+  <div class="modal modal-sm">
+    <div class="modal-header">
+      <div>
+        <div class="modal-title">Manager Access</div>
+        <div class="modal-sub">Enter PIN to continue</div>
+      </div>
+      <button class="modal-close" onclick="closeModal('manager-pin-modal')">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label class="form-label">Manager PIN</label>
+        <input class="form-input mono-input" id="manager-pin-input" type="password" maxlength="4" placeholder="••••" style="font-size:24px;letter-spacing:8px;text-align:center;">
+      </div>
+      <div id="manager-pin-error" class="form-error" style="display:none;"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('manager-pin-modal')">Cancel</button>
+      <button class="btn btn-primary" onclick="verifyManagerPin()">Unlock</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST CONTAINER -->
+<div id="toast-container" class="toast-container"></div>
+
+<!-- SYNC BADGE -->
+<div id="sync-badge" class="sync-badge" style="display:none;" onclick="syncOfflineQueue()">
+  <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.49"/></svg>
+  <span id="sync-count">0</span> pending
+</div>
+
+</div><!-- /app-shell -->
+
+<!-- ============================================================
+     SCRIPTS — same JS files, new design
+     ============================================================ -->
+<script src="js/db.js?v=2"></script>
+<script src="js/state.js?v=2"></script>
+<script src="js/utils.js?v=2"></script>
+<script src="js/i18n.js?v=5"></script>
+<script src="js/clock.js?v=2"></script>
+<script src="js/crypto.js?v=1"></script>
+<script src="js/selects.js?v=1"></script>
+<script src="js/binTile.js?v=2"></script>
+<script src="js/render.js?v=6"></script>
+<script src="js/actions.js?v=8"></script>
+<script src="js/receipt.js?v=1"></script>
+<script src="js/offline-queue.js?v=1"></script>
+<script src="js/error-boundary.js?v=1"></script>
+<script src="js/init.js?v=3"></script>
+
+<!-- Auto-calc net weight -->
+<script>
+(function(){
+  function calcNet(){
+    const g=parseFloat(document.getElementById('i-gross-wt')?.value)||0;
+    const v=parseFloat(document.getElementById('i-veh-wt')?.value)||0;
+    const n=document.getElementById('i-net-wt');
+    if(n) n.value = g && v ? (g-v).toFixed(1) : '';
+  }
+  document.addEventListener('DOMContentLoaded',()=>{
+    document.getElementById('i-gross-wt')?.addEventListener('input',calcNet);
+    document.getElementById('i-veh-wt')?.addEventListener('input',calcNet);
+    const rr=document.getElementById('d-rate');
+    const qq=document.getElementById('d-qty');
+    const aa=document.getElementById('d-amount');
+    function calcAmt(){
+      const r=parseFloat(rr?.value)||0;
+      const q=parseFloat(qq?.value)||0;
+      if(aa) aa.value = r && q ? (r*q).toFixed(2) : '';
+    }
+    rr?.addEventListener('input',calcAmt);
+    qq?.addEventListener('input',calcAmt);
+  });
+})();
+</script>
+
+</body>
+</html>
